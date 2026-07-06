@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #22c55e;
+  color: white;
+}
+
+/* Focus visibility for accessibility */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-card px-6 py-3 font-semibold text-sm transition-all duration-200;
+  }
+  .btn-primary {
+    @apply bg-primary text-white shadow-soft hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-lift;
+  }
+  .btn-outline {
+    @apply border-2 border-primary text-primary bg-white hover:bg-accent hover:-translate-y-0.5;
+  }
+  .btn-white {
+    @apply bg-white text-primary-dark shadow-soft hover:-translate-y-0.5;
+  }
+  .btn-outline-light {
+    @apply border-2 border-white/60 text-white hover:bg-white/10;
+  }
+  .section {
+    @apply px-6 md:px-10 lg:px-16 max-w-7xl mx-auto;
+  }
+  .eyebrow {
+    @apply text-xs md:text-sm font-bold tracking-widest uppercase text-primary;
+  }
+  .card {
+    @apply bg-white rounded-card shadow-soft border border-gray-100;
+  }
+}
