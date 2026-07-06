@@ -112,6 +112,13 @@ export default function Hero() {
         </div>
 
         {/* Right column */}
+
+        <img
+          src="/heroimage.png"
+          alt="Food Donation"
+          className="w-full max-w-[650px] h-auto object-contain"
+        />
+
         <HeroIllustration />
       </div>
     </section>
