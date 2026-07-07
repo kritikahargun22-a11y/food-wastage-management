@@ -4,7 +4,7 @@ import Hero from "./components/Hero.jsx";
 import StatsFloating from "./components/StatsFloating.jsx";
 import HowItWorks from "./components/HowItWorks.jsx";
 import WhyChoose from "./components/WhyChoose.jsx";
-
+import Login from "./pages/Login.jsx";
 // Lazy-load below-the-fold sections to keep the initial bundle light.
 const Impact = lazy(() => import("./components/Impact.jsx"));
 const Testimonials = lazy(() => import("./components/Testimonials.jsx"));
