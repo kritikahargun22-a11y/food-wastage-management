@@ -1,10 +1,12 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import Navbar from "./components/Navbar.jsx";
 import Hero from "./components/Hero.jsx";
 import StatsFloating from "./components/StatsFloating.jsx";
 import HowItWorks from "./components/HowItWorks.jsx";
 import WhyChoose from "./components/WhyChoose.jsx";
 import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
+
 // Lazy-load below-the-fold sections to keep the initial bundle light.
 const Impact = lazy(() => import("./components/Impact.jsx"));
 const Testimonials = lazy(() => import("./components/Testimonials.jsx"));
@@ -19,7 +21,27 @@ function SectionFallback() {
   );
 }
 
+/**
+ * Minimal hash-based routing — no router dependency needed.
+ * Navbar links to #login / #signup render the auth pages;
+ * anything else (or no hash) shows the landing page.
+ */
+function useHashRoute() {
+  const [hash, setHash] = useState(window.location.hash);
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash);
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+  return hash;
+}
+
 export default function App() {
+  const hash = useHashRoute();
+
+  if (hash === "#login") return <Login />;
+  if (hash === "#signup") return <Signup />;
+
   return (
     <div className="min-h-screen bg-white text-ink">
       <Navbar />

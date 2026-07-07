@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, HeartHandshake, Utensils } from "lucide-react";
 import AuthLayout from "../components/AuthLayout.jsx";
 
-export default function Login() {
+const ROLES = [
+    { id: "donor", label: "Donor", desc: "I want to donate surplus food", icon: Utensils },
+    { id: "ngo", label: "NGO / Volunteer", desc: "I want to receive & distribute food", icon: HeartHandshake },
+];
+
+export default function Signup() {
     const [showPassword, setShowPassword] = useState(false);
-    const [form, setForm] = useState({ email: "", password: "" });
-    const [remember, setRemember] = useState(true);
+    const [role, setRole] = useState("donor");
+    const [agree, setAgree] = useState(false);
+    const [form, setForm] = useState({ name: "", email: "", password: "" });
 
     function handleChange(e) {
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -15,18 +21,68 @@ export default function Login() {
     function handleSubmit(e) {
         e.preventDefault();
         // UI only — wire this up to your auth backend.
-        console.log("Login submitted:", { ...form, remember });
+        console.log("Signup submitted:", { ...form, role, agree });
     }
 
     return (
         <AuthLayout
-            title="Welcome back"
-            subtitle="Log in to continue donating, tracking deliveries, and making an impact."
+            title="Create your account"
+            subtitle="Join 5,000+ donors and NGOs turning surplus food into shared meals."
         >
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                {/* Role selector */}
+                <div>
+                    <span className="block text-sm font-semibold text-ink mb-2">I am joining as a</span>
+                    <div className="grid grid-cols-2 gap-3">
+                        {ROLES.map((r) => (
+                            <button
+                                key={r.id}
+                                type="button"
+                                onClick={() => setRole(r.id)}
+                                aria-pressed={role === r.id}
+                                className={`text-left rounded-xl border px-4 py-3 transition ${role === r.id
+                                        ? "border-primary bg-accent shadow-soft"
+                                        : "border-gray-200 hover:border-primary/40"
+                                    }`}
+                            >
+                                <r.icon
+                                    className={`h-4.5 w-4.5 mb-2 ${role === r.id ? "text-primary-dark" : "text-muted"}`}
+                                    aria-hidden="true"
+                                />
+                                <span className="block text-sm font-bold text-ink">{r.label}</span>
+                                <span className="block text-xs text-muted mt-0.5">{r.desc}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Name */}
+                <div>
+                    <label htmlFor="name" className="block text-sm font-semibold text-ink mb-1.5">
+                        Full name
+                    </label>
+                    <div className="relative">
+                        <User
+                            className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted"
+                            aria-hidden="true"
+                        />
+                        <input
+                            id="name"
+                            name="name"
+                            type="text"
+                            required
+                            autoComplete="name"
+                            value={form.name}
+                            onChange={handleChange}
+                            placeholder="Your full name"
+                            className="w-full rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-3 text-sm text-ink placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition"
+                        />
+                    </div>
+                </div>
+
                 {/* Email */}
                 <div>
-                    <label htmlFor="email" className="block text-sm font-semibold text-ink mb-1.5">
+                    <label htmlFor="signup-email" className="block text-sm font-semibold text-ink mb-1.5">
                         Email address
                     </label>
                     <div className="relative">
@@ -35,7 +91,7 @@ export default function Login() {
                             aria-hidden="true"
                         />
                         <input
-                            id="email"
+                            id="signup-email"
                             name="email"
                             type="email"
                             required
@@ -50,28 +106,24 @@ export default function Login() {
 
                 {/* Password */}
                 <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                        <label htmlFor="password" className="block text-sm font-semibold text-ink">
-                            Password
-                        </label>
-                        <a href="#forgot-password" className="text-xs font-semibold text-primary hover:text-primary-dark">
-                            Forgot password?
-                        </a>
-                    </div>
+                    <label htmlFor="signup-password" className="block text-sm font-semibold text-ink mb-1.5">
+                        Password
+                    </label>
                     <div className="relative">
                         <Lock
                             className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted"
                             aria-hidden="true"
                         />
                         <input
-                            id="password"
+                            id="signup-password"
                             name="password"
                             type={showPassword ? "text" : "password"}
                             required
-                            autoComplete="current-password"
+                            minLength={8}
+                            autoComplete="new-password"
                             value={form.password}
                             onChange={handleChange}
-                            placeholder="Enter your password"
+                            placeholder="At least 8 characters"
                             className="w-full rounded-xl border border-gray-200 bg-white pl-10 pr-11 py-3 text-sm text-ink placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition"
                         />
                         <button
@@ -85,15 +137,25 @@ export default function Login() {
                     </div>
                 </div>
 
-                {/* Remember me */}
-                <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                {/* Terms */}
+                <label className="flex items-start gap-2.5 cursor-pointer select-none">
                     <input
                         type="checkbox"
-                        checked={remember}
-                        onChange={(e) => setRemember(e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/30"
+                        required
+                        checked={agree}
+                        onChange={(e) => setAgree(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/30"
                     />
-                    <span className="text-sm text-muted">Keep me signed in</span>
+                    <span className="text-sm text-muted">
+                        I agree to the{" "}
+                        <a href="#terms" className="font-semibold text-primary hover:text-primary-dark">
+                            Terms of Service
+                        </a>{" "}
+                        and{" "}
+                        <a href="#privacy" className="font-semibold text-primary hover:text-primary-dark">
+                            Privacy Policy
+                        </a>
+                    </span>
                 </label>
 
                 <motion.button
@@ -102,18 +164,17 @@ export default function Login() {
                     type="submit"
                     className="w-full btn btn-primary justify-center text-base"
                 >
-                    Log In
+                    Create Account
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </motion.button>
 
                 {/* Divider */}
                 <div className="flex items-center gap-3 py-1">
                     <span className="h-px flex-1 bg-gray-200" />
-                    <span className="text-xs font-medium text-muted">or continue with</span>
+                    <span className="text-xs font-medium text-muted">or sign up with</span>
                     <span className="h-px flex-1 bg-gray-200" />
                 </div>
 
-                {/* Social login */}
                 <div className="grid grid-cols-2 gap-3">
                     <button
                         type="button"
@@ -140,9 +201,9 @@ export default function Login() {
             </form>
 
             <p className="mt-8 text-center text-sm text-muted">
-                Don't have an account?{" "}
-                <a href="#signup" className="font-semibold text-primary hover:text-primary-dark">
-                    Sign up for free
+                Already have an account?{" "}
+                <a href="#login" className="font-semibold text-primary hover:text-primary-dark">
+                    Log in
                 </a>
             </p>
         </AuthLayout>

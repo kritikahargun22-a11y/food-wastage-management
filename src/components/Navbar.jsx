@@ -23,11 +23,10 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        scrolled
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled
           ? "bg-white/90 backdrop-blur-md shadow-soft"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <nav
         aria-label="Primary"
@@ -52,9 +51,8 @@ export default function Navbar() {
             <li key={link.href}>
               <a
                 href={link.href}
-                className={`text-sm font-medium text-ink/80 hover:text-primary transition-colors ${
-                  i === 0 ? "text-primary font-semibold" : ""
-                }`}
+                className={`text-sm font-medium text-ink/80 hover:text-primary transition-colors ${i === 0 ? "text-primary font-semibold" : ""
+                  }`}
               >
                 {link.label}
               </a>
