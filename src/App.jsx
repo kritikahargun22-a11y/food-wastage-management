@@ -6,6 +6,8 @@ import HowItWorks from "./components/HowItWorks.jsx";
 import WhyChoose from "./components/WhyChoose.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
+import DonorDashboard from "./pages/dashboard/DonorDashboard.jsx";
+
 
 // Lazy-load below-the-fold sections to keep the initial bundle light.
 const Impact = lazy(() => import("./components/Impact.jsx"));
@@ -41,6 +43,7 @@ export default function App() {
 
   if (hash === "#login") return <Login />;
   if (hash === "#signup") return <Signup />;
+  if (hash === "#dashboard") return <DonorDashboard />;
 
   return (
     <div className="min-h-screen bg-white text-ink">

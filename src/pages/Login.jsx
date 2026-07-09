@@ -16,6 +16,7 @@ export default function Login() {
         e.preventDefault();
         // UI only — wire this up to your auth backend.
         console.log("Login submitted:", { ...form, remember });
+        window.location.hash = "#dashboard";
     }
 
     return (

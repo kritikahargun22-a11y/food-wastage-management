@@ -8,11 +8,7 @@ export default function HeroIllustration() {
       transition={{ duration: 0.8 }}
       className="flex justify-center lg:justify-end"
     >
-      <img
-        src="/hero-illustration.png"
-        alt="FoodShare Hero"
-        className="w-full max-w-[650px] h-auto object-contain"
-      />
+      
     </motion.div>
   );
 }

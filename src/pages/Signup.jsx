@@ -22,6 +22,7 @@ export default function Signup() {
         e.preventDefault();
         // UI only — wire this up to your auth backend.
         console.log("Signup submitted:", { ...form, role, agree });
+        window.location = "#dashboard"
     }
 
     return (

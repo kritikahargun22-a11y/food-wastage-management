@@ -115,7 +115,7 @@ export default function Hero() {
 
         <img
           src="/heroimage.png"
-          alt="Food Donation"
+          
           className="w-full max-w-[650px] h-auto object-contain"
         />
 
