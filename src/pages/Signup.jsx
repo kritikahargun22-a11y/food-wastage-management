@@ -24,6 +24,16 @@ export default function Signup() {
         console.log("Signup submitted:", { ...form, role, agree });
         window.location = "#dashboard"
     }
+    function handleSubmit(e) {
+        e.preventDefault();
+        console.log("Signup submitted:", { ...form, role, agree });
+        
+        if (role === "ngo") {
+          window.location.hash = "#ngo-dashboard";
+        } else {
+          window.location.hash = "#dashboard";
+        }
+      }
 
     return (
         <AuthLayout

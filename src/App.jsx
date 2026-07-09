@@ -7,7 +7,9 @@ import WhyChoose from "./components/WhyChoose.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import DonorDashboard from "./pages/dashboard/DonorDashboard.jsx";
-
+import NgoDashboard from "./pages/dashboard/NgoDashboard.jsx";
+import AdminDashboard from "./pages/dashboard/AdminDashboard.jsx";
+import Profile from "./pages/profile.jsx";
 
 // Lazy-load below-the-fold sections to keep the initial bundle light.
 const Impact = lazy(() => import("./components/Impact.jsx"));
@@ -44,9 +46,15 @@ export default function App() {
   if (hash === "#login") return <Login />;
   if (hash === "#signup") return <Signup />;
   if (hash === "#dashboard") return <DonorDashboard />;
-  if (hash === "#dashboard") return <NgoDashboard />;
-
-  return (
+  if (hash === "#ngo-dashboard") return <NgoDashboard />;
+  if (hash === "#admin-dashboard") {
+    const isAdmin = sessionStorage.getItem("foodshare_isAdmin") === "true";
+    if (isAdmin) return <AdminDashboard />;
+    window.location.hash = "#login";
+    return null;
+  }
+  if (hash === "#profile") return <Profile />;
+    return (
     <div className="min-h-screen bg-white text-ink">
       <Navbar />
       <main>

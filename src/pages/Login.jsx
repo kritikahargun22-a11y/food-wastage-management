@@ -18,6 +18,24 @@ export default function Login() {
         console.log("Login submitted:", { ...form, remember });
         window.location.hash = "#dashboard";
     }
+    
+    function handleSubmit(e) {
+        e.preventDefault();
+        console.log("Login submitted:", { ...form, remember });
+      
+        // Demo-only admin check — backend banne ke baad ise real auth se replace karna
+        const ADMIN_EMAIL = "admin@foodshare.com";
+        const ADMIN_PASSWORD = "Admin@123";
+      
+        if (form.email === ADMIN_EMAIL && form.password === ADMIN_PASSWORD) {
+          sessionStorage.setItem("foodshare_isAdmin", "true");
+          window.location.hash = "#admin-dashboard";
+          return;
+        }
+      
+        sessionStorage.removeItem("foodshare_isAdmin");
+        window.location.hash = "#dashboard";
+      }
 
     return (
         <AuthLayout
@@ -103,7 +121,7 @@ export default function Login() {
                     type="submit"
                     className="w-full btn btn-primary justify-center text-base"
                 >
-                    Log In
+                    Get started
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </motion.button>
 

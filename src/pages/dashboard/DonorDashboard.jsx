@@ -26,7 +26,7 @@ const NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, active: true },
   { label: "Donate Food", icon: PackagePlus },
   { label: "My Donations", icon: History },
-  { label: "Profile", icon: User },
+  { label: "Profile", icon: User, href: "#profile" },
 ];
 
 function Sidebar({ open, onClose }) {
@@ -61,7 +61,7 @@ function Sidebar({ open, onClose }) {
           {NAV_ITEMS.map((item) => (
             <a
               key={item.label}
-              href="#"
+              href={item.herf}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
                 item.active
                   ? "bg-accent text-primary-dark"
@@ -377,8 +377,7 @@ export default function DonorDashboard() {
             className="mb-8"
           >
             <h1 className="text-2xl font-extrabold text-primary-darker tracking-tight">
-              Welcome to the FoodShare's Trusrted Kitchen Network 🍲
-             </h1>
+              Welcome back</h1>
             <p className="text-sm text-muted mt-1">
               Here's what's happening with your donations today.
             </p>
