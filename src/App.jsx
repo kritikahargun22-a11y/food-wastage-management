@@ -44,6 +44,7 @@ export default function App() {
   if (hash === "#login") return <Login />;
   if (hash === "#signup") return <Signup />;
   if (hash === "#dashboard") return <DonorDashboard />;
+  if (hash === "#dashboard") return <NgoDashboard />;
 
   return (
     <div className="min-h-screen bg-white text-ink">
