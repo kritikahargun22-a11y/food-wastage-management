@@ -4,35 +4,35 @@ import {
   LayoutDashboard,
   PackagePlus,
   History,
+  Bell as BellIcon,
   User,
   LogOut,
   Search,
-  Bell,
   Leaf,
-  Utensils,
-  Clock,
-  CheckCircle2,
-  Truck,
-  ImagePlus,
-  MapPin,
-  Calendar,
-  TrendingUp,
   Menu,
   X,
+  TrendingUp,
+  Plus,
+  Camera,
+  MapPin,
+  BarChart3,
+  Weight,
+  Utensils,
+  Recycle,
 } from "lucide-react";
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Overview", icon: LayoutDashboard, active: true },
-  { label: "Donate Food", icon: PackagePlus },
-  { label: "My Donations", icon: History },
+  { label: "Dashboard", icon: LayoutDashboard, active: true, href: "#dashboard" },
+  { label: "Donate Food", icon: PackagePlus, href: "#" },
+  { label: "Donation History", icon: History, href: "#" },
+  { label: "Notifications", icon: BellIcon, href: "#" },
   { label: "Profile", icon: User, href: "#profile" },
 ];
 
 function Sidebar({ open, onClose }) {
   return (
     <>
-      {/* mobile overlay */}
       {open && (
         <div
           className="fixed inset-0 bg-black/30 z-40 lg:hidden"
@@ -61,7 +61,7 @@ function Sidebar({ open, onClose }) {
           {NAV_ITEMS.map((item) => (
             <a
               key={item.label}
-              href={item.herf}
+              href={item.href}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
                 item.active
                   ? "bg-accent text-primary-dark"
@@ -73,6 +73,15 @@ function Sidebar({ open, onClose }) {
             </a>
           ))}
         </nav>
+
+        {/* Impact summary — sidebar ke andar, floating badge ki jagah */}
+        <div className="mx-4 mb-4 rounded-xl bg-accent/60 border border-emerald-100 px-4 py-3.5">
+          <div className="flex items-center gap-2 mb-1">
+            <Recycle className="h-4 w-4 text-primary-dark" aria-hidden="true" />
+            <p className="text-xs font-bold text-primary-darker uppercase tracking-wide">Your Impact</p>
+          </div>
+          <p className="text-xs text-muted leading-snug">142 kg rescued · 6 donations this month</p>
+        </div>
 
         <div className="px-4 py-6 border-t border-gray-100">
           <a
@@ -88,49 +97,42 @@ function Sidebar({ open, onClose }) {
   );
 }
 
-/* ---------------- Topbar ---------------- */
-function Topbar({ onMenuClick }) {
+/* ---------------- Header ---------------- */
+function DashboardHeader({ onMenuClick }) {
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 h-20">
       <div className="flex items-center gap-3">
-        <button
-          onClick={onMenuClick}
-          className="lg:hidden text-ink"
-          aria-label="Open menu"
-        >
+        <button onClick={onMenuClick} className="lg:hidden text-ink" aria-label="Open menu">
           <Menu className="h-6 w-6" />
         </button>
-        <div className="relative hidden sm:block">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
-          <input
-            type="search"
-            placeholder="Search donations..."
-            className="w-64 rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-          />
-        </div>
+        <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">
+          Welcome back, Aarav 👋
+        </h1>
       </div>
 
       <div className="flex items-center gap-4">
-        <button
-          className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent"
-          aria-label="Notifications"
-        >
-          <Bell className="h-5 w-5 text-ink" />
+        <div className="relative hidden md:block">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+          <input
+            type="search"
+            placeholder="Search..."
+            className="w-56 rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+          />
+        </div>
+        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent" aria-label="Notifications">
+          <BellIcon className="h-5 w-5 text-ink" />
           <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
         </button>
-        <div className="flex items-center gap-2.5">
-          <span className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-200 to-orange-400 flex items-center justify-center text-xs font-bold text-white">
-            AM
-          </span>
-          <span className="hidden sm:block text-sm font-semibold text-ink">Arjun Mehta</span>
-        </div>
+        <span className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-200 to-orange-400 flex items-center justify-center text-xs font-bold text-white">
+          AM
+        </span>
       </div>
     </header>
   );
 }
 
 /* ---------------- Stat Card ---------------- */
-function StatCard({ icon: Icon, value, label, trend, delay }) {
+function StatCard({ icon: Icon, iconBg, value, label, trend, delay }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -140,12 +142,12 @@ function StatCard({ icon: Icon, value, label, trend, delay }) {
       className="card p-6"
     >
       <div className="flex items-center justify-between mb-4">
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent">
-          <Icon className="h-5 w-5 text-primary-dark" aria-hidden="true" />
+        <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconBg}`}>
+          <Icon className="h-5 w-5 text-white" aria-hidden="true" />
         </span>
         {trend && (
-          <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
-            <TrendingUp className="h-3.5 w-3.5" /> {trend}
+          <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 rounded-full px-2.5 py-1">
+            <TrendingUp className="h-3 w-3" /> {trend}
           </span>
         )}
       </div>
@@ -155,24 +157,13 @@ function StatCard({ icon: Icon, value, label, trend, delay }) {
   );
 }
 
-/* ---------------- Donate Food Form ---------------- */
-function DonateFoodForm() {
-  const [form, setForm] = useState({
-    foodType: "",
-    quantity: "",
-    expiry: "",
-    address: "",
-  });
+/* ---------------- Donations Over Time (chart placeholder) ---------------- */
+const RANGES = ["Month", "Quarter", "Year"];
+const CHART_DATA = [40, 65, 30, 80, 55, 90, 45];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  function handleChange(e) {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    // UI only — connect to backend later.
-    console.log("Donation submitted:", form);
-  }
+function DonationsChart() {
+  const [range, setRange] = useState("Month");
 
   return (
     <motion.div
@@ -181,176 +172,159 @@ function DonateFoodForm() {
       transition={{ duration: 0.4, delay: 0.2 }}
       className="card p-7"
     >
-      <div className="flex items-center gap-3 mb-6">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
-          <PackagePlus className="h-5 w-5 text-primary-dark" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 className="text-lg font-bold text-primary-darker">Donate Food</h2>
-          <p className="text-xs text-muted">List surplus food in under a minute</p>
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
+        <h2 className="text-lg font-bold text-primary-darker">Donations Over Time</h2>
+        <div className="flex gap-1 rounded-xl bg-gray-100 p-1">
+          {RANGES.map((r) => (
+            <button
+              key={r}
+              onClick={() => setRange(r)}
+              className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
+                range === r ? "bg-white text-primary-dark shadow-soft" : "text-muted"
+              }`}
+            >
+              {r}
+            </button>
+          ))}
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Photo upload */}
-        <label className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-8 cursor-pointer hover:border-primary/50 hover:bg-accent/40 transition">
-          <ImagePlus className="h-6 w-6 text-muted" aria-hidden="true" />
-          <span className="text-sm font-semibold text-ink">Upload food photo</span>
-          <span className="text-xs text-muted">PNG, JPG up to 5MB</span>
-          <input type="file" accept="image/*" className="hidden" />
-        </label>
-
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="foodType" className="block text-sm font-semibold text-ink mb-1.5">
-              Food type
-            </label>
-            <div className="relative">
-              <Utensils className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
-              <input
-                id="foodType"
-                name="foodType"
-                type="text"
-                required
-                value={form.foodType}
-                onChange={handleChange}
-                placeholder="e.g. Cooked rice, vegetables"
-                className="w-full rounded-xl border border-gray-200 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="quantity" className="block text-sm font-semibold text-ink mb-1.5">
-              Quantity (approx. servings)
-            </label>
-            <input
-              id="quantity"
-              name="quantity"
-              type="number"
-              min="1"
-              required
-              value={form.quantity}
-              onChange={handleChange}
-              placeholder="e.g. 25"
-              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+      <div className="flex items-end justify-between gap-3 h-52 px-2">
+        {CHART_DATA.map((h, i) => (
+          <div key={DAYS[i]} className="flex-1 flex flex-col items-center gap-3">
+            <motion.div
+              initial={{ height: 0 }}
+              animate={{ height: `${h}%` }}
+              transition={{ duration: 0.6, delay: 0.1 * i, ease: "easeOut" }}
+              className="w-full max-w-[36px] rounded-t-lg bg-green-gradient"
             />
+            <span className="text-xs font-medium text-muted">{DAYS[i]}</span>
           </div>
-
-          <div>
-            <label htmlFor="expiry" className="block text-sm font-semibold text-ink mb-1.5">
-              Best before
-            </label>
-            <div className="relative">
-              <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
-              <input
-                id="expiry"
-                name="expiry"
-                type="datetime-local"
-                required
-                value={form.expiry}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-gray-200 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="address" className="block text-sm font-semibold text-ink mb-1.5">
-              Pickup address
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
-              <input
-                id="address"
-                name="address"
-                type="text"
-                required
-                value={form.address}
-                onChange={handleChange}
-                placeholder="Street, city"
-                className="w-full rounded-xl border border-gray-200 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-              />
-            </div>
-          </div>
-        </div>
-
-        <motion.button
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          type="submit"
-          className="w-full btn btn-primary justify-center text-base"
-        >
-          Submit Donation
-        </motion.button>
-      </form>
+        ))}
+      </div>
     </motion.div>
   );
 }
 
-/* ---------------- Recent Donations ---------------- */
-const STATUS_STYLES = {
-  Pending: { bg: "bg-amber-100", text: "text-amber-700", icon: Clock },
-  "Picked Up": { bg: "bg-sky-100", text: "text-sky-700", icon: Truck },
-  Delivered: { bg: "bg-emerald-100", text: "text-emerald-700", icon: CheckCircle2 },
-};
+/* ---------------- Quick Actions ---------------- */
+function QuickActions() {
+  const actions = [
+    { icon: Camera, label: "Upload food photo", bg: "bg-sky-500" },
+    { icon: MapPin, label: "Set pickup address", bg: "bg-amber-500" },
+    { icon: BarChart3, label: "View full history", bg: "bg-slate-800" },
+  ];
 
-const DONATIONS = [
-  { id: "DN-2481", food: "Cooked rice & curry", qty: "30 servings", date: "Jul 6, 2026", status: "Delivered" },
-  { id: "DN-2479", food: "Fresh vegetables", qty: "15 kg", date: "Jul 5, 2026", status: "Picked Up" },
-  { id: "DN-2475", food: "Bread & bakery items", qty: "20 packs", date: "Jul 4, 2026", status: "Pending" },
-  { id: "DN-2468", food: "Fruits assortment", qty: "18 kg", date: "Jul 2, 2026", status: "Delivered" },
-];
-
-function RecentDonations() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.3 }}
+      className="card p-7 flex flex-col"
+    >
+      <h2 className="text-lg font-bold text-primary-darker mb-5">Quick Actions</h2>
+
+      <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-green-gradient text-white font-semibold text-sm py-3.5 mb-4 hover:opacity-90 transition">
+        <Plus className="h-4 w-4" aria-hidden="true" />
+        Donate Food Now
+      </button>
+
+      <div className="space-y-3">
+        {actions.map((a) => (
+          <button
+            key={a.label}
+            className="w-full flex items-center gap-3 rounded-xl border border-gray-100 px-4 py-3 text-sm font-semibold text-ink hover:bg-gray-50 transition"
+          >
+            <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${a.bg}`}>
+              <a.icon className="h-4 w-4 text-white" aria-hidden="true" />
+            </span>
+            {a.label}
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ---------------- Active Donations ---------------- */
+const STATUS_STYLES = {
+  Available: "bg-emerald-100 text-emerald-700",
+  "In Transit": "bg-sky-100 text-sky-700",
+  Delivered: "bg-gray-100 text-gray-600",
+};
+
+const ACTIVE_DONATIONS = [
+  { emoji: "🥗", title: "Fresh Vegetable Crate", meta: "18 kg · Expires in 3h 20m", status: "Available" },
+  { emoji: "🍞", title: "Bakery Surplus Box", meta: "6 kg · Picked up 4:30 PM", status: "In Transit" },
+  { emoji: "🍛", title: "Cooked Meal Trays", meta: "30 servings · Delivered", status: "Delivered" },
+];
+
+function ActiveDonations() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.4 }}
+    >
+      <h2 className="text-lg font-bold text-primary-darker mb-5">Active Donations</h2>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {ACTIVE_DONATIONS.map((d) => (
+          <motion.div key={d.title} whileHover={{ y: -4 }} className="card overflow-hidden">
+            <div className="h-28 flex items-center justify-center text-4xl bg-gradient-to-br from-emerald-50 to-amber-50">
+              {d.emoji}
+            </div>
+            <div className="p-5">
+              <h3 className="text-sm font-bold text-ink mb-1">{d.title}</h3>
+              <p className="text-xs text-muted mb-3">{d.meta}</p>
+              <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold uppercase ${STATUS_STYLES[d.status]}`}>
+                {d.status}
+              </span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ---------------- Recent Activity Table ---------------- */
+const RECENT_ACTIVITY = [
+  { donation: "Fresh Vegetable Crate", ngo: "Hope Kitchen Trust", status: "Available", date: "Jul 05" },
+  { donation: "Bakery Surplus Box", ngo: "Seva Foundation", status: "In Transit", date: "Jul 04" },
+  { donation: "Cooked Meal Trays", ngo: "Anna Daan NGO", status: "Delivered", date: "Jul 02" },
+];
+
+function RecentActivity() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.5 }}
       className="card p-7"
     >
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-lg font-bold text-primary-darker">Recent Donations</h2>
-          <p className="text-xs text-muted">Track the status of your listed food</p>
-        </div>
-        <a href="#" className="text-sm font-semibold text-primary hover:text-primary-dark">
-          View all
-        </a>
-      </div>
-
+      <h2 className="text-lg font-bold text-primary-darker mb-6">Recent Activity</h2>
       <div className="overflow-x-auto -mx-2">
         <table className="w-full text-sm min-w-[560px]">
           <thead>
             <tr className="text-left text-xs font-bold uppercase tracking-wide text-muted">
-              <th className="px-2 pb-3">ID</th>
-              <th className="px-2 pb-3">Food</th>
-              <th className="px-2 pb-3">Quantity</th>
-              <th className="px-2 pb-3">Date</th>
+              <th className="px-2 pb-3">Donation</th>
+              <th className="px-2 pb-3">NGO</th>
               <th className="px-2 pb-3">Status</th>
+              <th className="px-2 pb-3">Date</th>
             </tr>
           </thead>
           <tbody>
-            {DONATIONS.map((d) => {
-              const s = STATUS_STYLES[d.status];
-              return (
-                <tr key={d.id} className="border-t border-gray-100">
-                  <td className="px-2 py-3.5 font-semibold text-ink">{d.id}</td>
-                  <td className="px-2 py-3.5 text-ink/80">{d.food}</td>
-                  <td className="px-2 py-3.5 text-ink/80">{d.qty}</td>
-                  <td className="px-2 py-3.5 text-ink/60">{d.date}</td>
-                  <td className="px-2 py-3.5">
-                    <span
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${s.bg} ${s.text}`}
-                    >
-                      <s.icon className="h-3.5 w-3.5" aria-hidden="true" />
-                      {d.status}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
+            {RECENT_ACTIVITY.map((r) => (
+              <tr key={r.donation} className="border-t border-gray-100">
+                <td className="px-2 py-3.5 font-semibold text-ink">{r.donation}</td>
+                <td className="px-2 py-3.5 text-ink/80">{r.ngo}</td>
+                <td className="px-2 py-3.5">
+                  <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${STATUS_STYLES[r.status]}`}>
+                    {r.status}
+                  </span>
+                </td>
+                <td className="px-2 py-3.5 text-ink/60 font-mono text-xs">{r.date}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -367,39 +341,25 @@ export default function DonorDashboard() {
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar onMenuClick={() => setSidebarOpen(true)} />
+        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="mb-8"
-          >
-            <h1 className="text-2xl font-extrabold text-primary-darker tracking-tight">
-              Welcome back</h1>
-            <p className="text-sm text-muted mt-1">
-              Here's what's happening with your donations today.
-            </p>
-          </motion.div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-            <StatCard icon={Utensils} value="42" label="Total Donations" trend="+12%" delay={0} />
-            <StatCard icon={CheckCircle2} value="1,260" label="Meals Contributed" trend="+8%" delay={0.05} />
-            <StatCard icon={Truck} value="3" label="Active Pickups" delay={0.1} />
-            <StatCard icon={TrendingUp} value="87" label="Impact Score" trend="+5%" delay={0.15} />
+        <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto space-y-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            <StatCard icon={PackagePlus} iconBg="bg-emerald-500" value="24" label="Total Donations" trend="+12%" delay={0} />
+            <StatCard icon={Weight} iconBg="bg-orange-500" value="142 kg" label="Food Donated" trend="+8%" delay={0.05} />
+            <StatCard icon={Utensils} iconBg="bg-sky-500" value="312" label="Meals Provided" trend="+15%" delay={0.1} />
+            <StatCard icon={Recycle} iconBg="bg-slate-800" value="89 kg" label="CO₂ Reduced" trend="+5%" delay={0.15} />
           </div>
 
-          {/* Form + Recent donations */}
-          <div className="grid lg:grid-cols-5 gap-6">
+          <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <DonateFoodForm />
+              <DonationsChart />
             </div>
-            <div className="lg:col-span-3">
-              <RecentDonations />
-            </div>
+            <QuickActions />
           </div>
+
+          <ActiveDonations />
+          <RecentActivity />
         </main>
       </div>
     </div>

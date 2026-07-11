@@ -10,6 +10,7 @@ import DonorDashboard from "./pages/dashboard/DonorDashboard.jsx";
 import NgoDashboard from "./pages/dashboard/NgoDashboard.jsx";
 import AdminDashboard from "./pages/dashboard/AdminDashboard.jsx";
 import Profile from "./pages/profile.jsx";
+import VolunteerDashboard from "./pages/dashboard/VolunteerDashboard.jsx";
 
 // Lazy-load below-the-fold sections to keep the initial bundle light.
 const Impact = lazy(() => import("./components/Impact.jsx"));
@@ -54,6 +55,7 @@ export default function App() {
     return null;
   }
   if (hash === "#profile") return <Profile />;
+  if (hash === "#volunteer-dashboard") return <VolunteerDashboard />
     return (
     <div className="min-h-screen bg-white text-ink">
       <Navbar />
