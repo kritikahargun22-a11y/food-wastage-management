@@ -6,7 +6,7 @@ import {
   Phone,
   MapPin,
   Lock,
-  Bell,
+
   Camera,
   Save,
   Eye,
@@ -19,7 +19,7 @@ import {
 const TABS = [
   { id: "profile", label: "Profile Info", icon: User },
   { id: "security", label: "Security", icon: Lock },
-  { id: "notifications", label: "Notifications", icon: Bell },
+  ,
 ];
 
 /* ---------------- Header ---------------- */
@@ -82,11 +82,10 @@ function TabNav({ active, onChange }) {
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
-            active === tab.id
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${active === tab.id
               ? "border-primary text-primary-dark"
               : "border-transparent text-muted hover:text-ink"
-          }`}
+            }`}
         >
           <tab.icon className="h-4 w-4" aria-hidden="true" />
           {tab.label}
@@ -297,70 +296,7 @@ function SecurityTab() {
   );
 }
 
-/* ---------------- Notifications Tab ---------------- */
-function ToggleRow({ label, desc, checked, onChange }) {
-  return (
-    <div className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
-      <div className="pr-4">
-        <p className="text-sm font-semibold text-ink">{label}</p>
-        <p className="text-xs text-muted mt-0.5">{desc}</p>
-      </div>
-      <button
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${
-          checked ? "bg-primary" : "bg-gray-200"
-        }`}
-      >
-        <motion.span
-          layout
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow"
-          style={{ left: checked ? "22px" : "2px" }}
-        />
-      </button>
-    </div>
-  );
-}
 
-function NotificationsTab() {
-  const [prefs, setPrefs] = useState({
-    pickup: true,
-    ngoAccept: true,
-    impactReports: true,
-    promotions: false,
-  });
-
-  return (
-    <div className="max-w-lg">
-      <ToggleRow
-        label="Pickup updates"
-        desc="Get notified when a volunteer is assigned or en route."
-        checked={prefs.pickup}
-        onChange={(v) => setPrefs((p) => ({ ...p, pickup: v }))}
-      />
-      <ToggleRow
-        label="NGO acceptance alerts"
-        desc="Know instantly when an NGO accepts your donation."
-        checked={prefs.ngoAccept}
-        onChange={(v) => setPrefs((p) => ({ ...p, ngoAccept: v }))}
-      />
-      <ToggleRow
-        label="Monthly impact reports"
-        desc="Receive a summary of meals and families you've helped."
-        checked={prefs.impactReports}
-        onChange={(v) => setPrefs((p) => ({ ...p, impactReports: v }))}
-      />
-      <ToggleRow
-        label="Promotions & news"
-        desc="Occasional updates about new features and events."
-        checked={prefs.promotions}
-        onChange={(v) => setPrefs((p) => ({ ...p, promotions: v }))}
-      />
-    </div>
-  );
-}
 
 /* ---------------- Main Page ---------------- */
 export default function Profile() {
@@ -390,7 +326,7 @@ export default function Profile() {
             >
               {activeTab === "profile" && <ProfileInfoTab />}
               {activeTab === "security" && <SecurityTab />}
-              {activeTab === "notifications" && <NotificationsTab />}
+
             </motion.div>
           </AnimatePresence>
         </motion.div>
