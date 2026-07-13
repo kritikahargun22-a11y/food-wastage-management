@@ -18,10 +18,10 @@ import {
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-    { label: "Dashboard", icon: LayoutDashboard, href: "#dashboard" },
+    { label: "Overview", icon: LayoutDashboard, href: "#dashboard" },
     { label: "Donate Food", icon: PackagePlus, href: "#donate-food" },
     { label: "Donation History", icon: History, active: true, href: "#donation-history" },
-    { label: "Notifications", icon: BellIcon, href: "#" },
+    { label: "Notifications", icon: BellIcon, href: "#notification" },
     { label: "Profile", icon: User, href: "#profile" },
 ];
 
