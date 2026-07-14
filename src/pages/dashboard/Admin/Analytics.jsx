@@ -28,8 +28,8 @@ const NAV_ITEMS = [
   { label: "Manage Donations", icon: Truck, href: "#manage-donations" },
   { label: "Approve NGOs", icon: Building2, active: true, href: "#approve-ngos" },
   { label: "Analytics", icon: BarChart3, href: "#analytics" },
-  { label: "Reports", icon: FileText, href: "#" },
-  { label: "Settings", icon: Settings, href: "#profile" },
+  { label: "Reports", icon: FileText, href: "#reports" },
+  { label: "Settings", icon: Settings, href: "#admin-settings" },
 ];
 
 function Sidebar({ open, onClose }) {
@@ -160,20 +160,19 @@ function DonationsTrend() {
                     transition={{ duration: 1.2, ease: "easeOut" }}
                 />
                 
-   <motion.g
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ duration: 1 }}
->
-  <polyline
-    points={toPoints(kg)}
-    fill="none"
-    stroke="#F97316"
-    strokeWidth="2"
-    strokeDasharray="4 4"
-    strokeLinecap="round"
-  />
-</motion.g>
+   
+<polyline
+                    points={toPoints(kg)}
+                    fill="none"
+                    stroke="#F97316"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray="2"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                />
             </svg>
             <div className="flex items-center gap-6 mt-2">
                 <span className="flex items-center gap-2 text-xs font-semibold text-muted">

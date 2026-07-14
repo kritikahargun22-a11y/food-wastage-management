@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
@@ -14,11 +14,11 @@ import {
   Menu,
   X,
   ShieldCheck,
-  MapPin,
+  Download,
+  FileSpreadsheet,
+  FileType2,
   Calendar,
-  FileCheck2,
-  Check,
-  XCircle,
+  TrendingUp,
 } from "lucide-react";
 
 /* ---------------- Sidebar ---------------- */
@@ -26,9 +26,9 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "#admin-dashboard" },
   { label: "Manage Users", icon: Users, href: "#manage-users" },
   { label: "Manage Donations", icon: Truck, href: "#manage-donations" },
-  { label: "Approve NGOs", icon: Building2, active: true, href: "#approve-ngos" },
+  { label: "Approve NGOs", icon: Building2, href: "#approve-ngos" },
   { label: "Analytics", icon: BarChart3, href: "#analytics" },
-  { label: "Reports", icon: FileText, href: "#reports" },
+  { label: "Reports", icon: FileText, active: true, href: "#reports" },
   { label: "Settings", icon: Settings, href: "#admin-settings" },
 ];
 
@@ -122,144 +122,90 @@ function DashboardHeader({ onMenuClick }) {
   );
 }
 
-/* ---------------- Pending Approvals ---------------- */
-const INITIAL_PENDING = [
-  {
-    id: "1",
-    name: "Seva Foundation",
-    location: "Mumbai, Maharashtra",
-    registered: "Jul 04, 2026",
-    docs: 3,
-  },
-  {
-    id: "2",
-    name: "Anna Daan NGO",
-    location: "Pune, Maharashtra",
-    registered: "Jul 03, 2026",
-    docs: 4,
-  },
-  {
-    id: "3",
-    name: "Roshni Welfare Trust",
-    location: "Jaipur, Rajasthan",
-    registered: "Jul 01, 2026",
-    docs: 2,
-  },
-];
-
-function PendingApprovals() {
-  const [items, setItems] = useState(INITIAL_PENDING);
-
-  function decide(id) {
-    setItems((list) => list.filter((x) => x.id !== id));
-  }
-
+/* ---------------- Summary Cards ---------------- */
+function SummaryCard({ icon: Icon, iconBg, value, label, trend, delay }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="card p-7"
+      transition={{ duration: 0.4, delay }}
+      whileHover={{ y: -4 }}
+      className="card p-6"
     >
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-primary-darker">Pending Approvals</h2>
-        <span className="rounded-full bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1">
-          {items.length} waiting
+      <div className="flex items-center justify-between mb-4">
+        <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconBg}`}>
+          <Icon className="h-5 w-5 text-white" aria-hidden="true" />
         </span>
-      </div>
-
-      <div className="space-y-3">
-        <AnimatePresence>
-          {items.map((item) => (
-            <motion.div
-              key={item.id}
-              layout
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-              transition={{ duration: 0.3 }}
-              className="rounded-xl border border-gray-100 p-5"
-            >
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="flex items-start gap-3 min-w-0">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent flex-shrink-0">
-                    <Building2 className="h-5 w-5 text-primary-dark" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-ink mb-1">{item.name}</p>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3.5 w-3.5" aria-hidden="true" /> {item.location}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" aria-hidden="true" /> Registered {item.registered}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <FileCheck2 className="h-3.5 w-3.5" aria-hidden="true" /> {item.docs} documents submitted
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => decide(item.id)}
-                    className="flex items-center gap-1.5 rounded-lg bg-primary text-white text-xs font-semibold px-4 py-2 hover:bg-primary-dark transition"
-                  >
-                    <Check className="h-3.5 w-3.5" aria-hidden="true" /> Approve
-                  </button>
-                  <button
-                    onClick={() => decide(item.id)}
-                    className="flex items-center gap-1.5 rounded-lg border border-gray-200 text-muted text-xs font-semibold px-4 py-2 hover:bg-gray-50 transition"
-                  >
-                    <XCircle className="h-3.5 w-3.5" aria-hidden="true" /> Reject
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {items.length === 0 && (
-          <p className="text-sm text-muted text-center py-10">No pending NGO approvals 🎉</p>
+        {trend && (
+          <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 rounded-full px-2.5 py-1">
+            <TrendingUp className="h-3 w-3" /> {trend}
+          </span>
         )}
       </div>
+      <div className="text-2xl font-extrabold text-primary-darker tracking-tight">{value}</div>
+      <p className="mt-1 text-sm text-muted font-medium">{label}</p>
     </motion.div>
   );
 }
 
-/* ---------------- Approved NGOs List ---------------- */
-const APPROVED_NGOS = [
-  { name: "Hope Kitchen Trust", location: "Amritsar, Punjab", approved: "May 28, 2026" },
-  { name: "Sunrise Foundation", location: "Delhi", approved: "Apr 15, 2026" },
-  { name: "Feeding Hands NGO", location: "Bengaluru, Karnataka", approved: "Mar 02, 2026" },
+/* ---------------- Monthly Reports List ---------------- */
+const REPORTS = [
+  { title: "June 2026 Impact Report", period: "Jun 1 – Jun 30, 2026", size: "1.2 MB", type: "pdf" },
+  { title: "May 2026 Impact Report", period: "May 1 – May 31, 2026", size: "1.1 MB", type: "pdf" },
+  { title: "Q2 2026 Donations Summary", period: "Apr 1 – Jun 30, 2026", size: "860 KB", type: "xlsx" },
+  { title: "April 2026 Impact Report", period: "Apr 1 – Apr 30, 2026", size: "1.0 MB", type: "pdf" },
+  { title: "Q1 2026 Donations Summary", period: "Jan 1 – Mar 31, 2026", size: "790 KB", type: "xlsx" },
 ];
 
-function ApprovedNgos() {
+function ReportsList() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.1 }}
+      transition={{ duration: 0.4, delay: 0.2 }}
       className="card p-7"
     >
-      <h2 className="text-lg font-bold text-primary-darker mb-6">Approved NGOs</h2>
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <h2 className="text-lg font-bold text-primary-darker">Generated Reports</h2>
+        <button className="btn btn-primary text-sm">
+          <FileText className="h-4 w-4" aria-hidden="true" />
+          Generate New Report
+        </button>
+      </div>
+
       <div className="space-y-3">
-        {APPROVED_NGOS.map((ngo) => (
+        {REPORTS.map((r) => (
           <div
-            key={ngo.name}
-            className="flex items-center justify-between rounded-xl border border-gray-100 px-4 py-3.5"
+            key={r.title}
+            className="flex items-center justify-between rounded-xl border border-gray-100 px-4 py-3.5 hover:bg-gray-50/60 transition"
           >
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 flex-shrink-0">
-                <Building2 className="h-4.5 w-4.5 text-emerald-600" aria-hidden="true" />
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${
+                  r.type === "pdf" ? "bg-red-50" : "bg-emerald-50"
+                }`}
+              >
+                {r.type === "pdf" ? (
+                  <FileType2 className="h-4.5 w-4.5 text-red-500" aria-hidden="true" />
+                ) : (
+                  <FileSpreadsheet className="h-4.5 w-4.5 text-emerald-600" aria-hidden="true" />
+                )}
               </span>
-              <div>
-                <p className="text-sm font-bold text-ink">{ngo.name}</p>
-                <p className="text-xs text-muted">{ngo.location}</p>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-ink truncate">{r.title}</p>
+                <p className="text-xs text-muted flex items-center gap-1.5">
+                  <Calendar className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
+                  {r.period} · {r.size}
+                </p>
               </div>
             </div>
-            <span className="text-xs text-muted font-mono">Since {ngo.approved}</span>
+            <button
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-ink px-3 py-2 hover:bg-accent hover:border-primary/40 transition flex-shrink-0"
+              aria-label={`Download ${r.title}`}
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden="true" />
+              Download
+            </button>
           </div>
         ))}
       </div>
@@ -268,7 +214,7 @@ function ApprovedNgos() {
 }
 
 /* ---------------- Main Page ---------------- */
-export default function ApproveNgosPage() {
+export default function ReportsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -279,8 +225,14 @@ export default function ApproveNgosPage() {
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
         <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto space-y-6">
-          <PendingApprovals />
-          <ApprovedNgos />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            <SummaryCard icon={FileText} iconBg="bg-emerald-500" value="24" label="Reports Generated" trend="+3" delay={0} />
+            <SummaryCard icon={Truck} iconBg="bg-sky-500" value="4,812" label="Donations This Quarter" trend="+18%" delay={0.05} />
+            <SummaryCard icon={Users} iconBg="bg-orange-500" value="1,240" label="New Users This Quarter" trend="+9%" delay={0.1} />
+            <SummaryCard icon={Building2} iconBg="bg-slate-800" value="38" label="NGOs Onboarded" trend="+5" delay={0.15} />
+          </div>
+
+          <ReportsList />
         </main>
       </div>
     </div>
