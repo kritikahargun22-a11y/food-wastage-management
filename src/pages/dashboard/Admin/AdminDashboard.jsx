@@ -21,12 +21,12 @@ import {
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-    { label: "Dashboard", icon: LayoutDashboard, active: true, href: "#admin-dashboard" },
-    { label: "Manage Users", icon: Users, href: "#" },
-    { label: "Manage Donations", icon: Utensils, href: "#" },
-    { label: "Approve NGOs", icon: Building2, href: "#" },
-    { label: "Analytics", icon: BarChart3, href: "#" },
-    { label: "Reports", icon: FileText, href: "#" },
+    { label: "Overview", icon: LayoutDashboard, active: true, href: "#admin-dashboard" },
+    { label: "Manage Users", icon: Users, href: "#manage-user" },
+    { label: "Manage Donations", icon: Utensils, href: "#manage-donations" },
+    { label: "Approve NGOs", icon: Building2, href: "#approve-ngos" },
+    { label: "Analytics", icon: BarChart3, href: "#analytics" },
+    { label: "Reports", icon: FileText, href: "#reposts" },
     { label: "Settings", icon: Settings, href: "#profile" },
 ];
 

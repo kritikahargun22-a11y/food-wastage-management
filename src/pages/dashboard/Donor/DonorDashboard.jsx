@@ -24,7 +24,7 @@ import {
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-    { label: "Dashboard", icon: LayoutDashboard, active: true, href: "#dashboard" },
+    { label: "Overview", icon: LayoutDashboard, active: true, href: "#dashboard" },
     { label: "Donate Food", icon: PackagePlus, href: "#donate-food" },
     { label: "Donation History", icon: History, href: "#donation-history" },
     { label: "Notifications", icon: BellIcon, href: "#notification" },

@@ -21,10 +21,10 @@ import {
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-    { label: "Dashboard", icon: LayoutDashboard, href: "#dashboard" },
+    { label: "Overview", icon: LayoutDashboard, href: "#dashboard" },
     { label: "Donate Food", icon: PackagePlus, active: true, href: "#donate-food" },
-    { label: "Donation History", icon: History, href: "#" },
-    { label: "Notifications", icon: BellIcon, href: "#" },
+    { label: "Donation History", icon: History, href: "#donation-history" },
+    { label: "Notifications", icon: BellIcon, href: "#notification" },
     { label: "Profile", icon: User, href: "#profile" },
 ];
 

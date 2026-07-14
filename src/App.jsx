@@ -7,16 +7,28 @@ import WhyChoose from "./components/WhyChoose.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 
-import DonorDashboard from "./pages/dashboard/DonorDashboard.jsx";
-import DonateFood from "./pages/dashboard/DonateFood.jsx";
-import DonationHistory from "./pages/dashboard/DonationHistory.jsx";
-import Notification from "./pages/dashboard/Notification.jsx";
-import Settings from "./pages/dashboard/Settings.jsx"
-
-import NgoDashboard from "./pages/dashboard/NgoDashboard.jsx";
-import AdminDashboard from "./pages/dashboard/AdminDashboard.jsx";
-import VolunteerDashboard from "./pages/dashboard/VolunteerDashboard.jsx";
+{/*Donor Dashboard*/}
+import DonorDashboard from "./pages/dashboard/Donor/DonorDashboard.jsx";
+import DonateFood from "./pages/dashboard/Donor/DonateFood.jsx";
+import DonationHistory from "./pages/dashboard/Donor/DonationHistory.jsx";
+import Notification from "./pages/dashboard/Donor/Notification.jsx";
+import Settings from "./pages/dashboard/Donor/Settings.jsx"
 import Profile from "./pages/Profile.jsx";
+
+{/*Ngo Dashboard*/}
+import NgoDashboard from "./pages/dashboard/Ngo/NgoDashboard.jsx";
+
+
+{/*Admin Dashboard*/}
+import AdminDashboard from "./pages/dashboard/Admin/AdminDashboard.jsx";
+import ManageUser from "./pages/dashboard/Admin/ManageUser.jsx";
+import ManageDonations from "./pages/dashboard/Admin/ManageDonations.jsx";
+import ApproveNGOs from "./pages/dashboard/Admin/ApproveNGOs.jsx"
+import Analytics from "./pages/dashboard/Admin/Analytics.jsx"
+
+{/*Volunteer Dashboard*/}
+import VolunteerDashboard from "./pages/dashboard/Volunteer/VolunteerDashboard.jsx";
+
 
 const Impact = lazy(() => import("./components/Impact.jsx"));
 const Testimonials = lazy(() => import("./components/Testimonials.jsx"));
@@ -46,21 +58,34 @@ export default function App() {
 
   if (hash === "#login") return <Login />;
   if (hash === "#signup") return <Signup />;
+
+  {/*Donor dashboard */}
   if (hash === "#dashboard") return <DonorDashboard />;
   if (hash === "#donate-food") return <DonateFood />;
   if (hash === "#donation-history") return <DonationHistory />;
   if (hash === "#notification") return <Notification />
   if (hash === "#settings") return <Settings />
-  if (hash === "#ngo-dashboard") return <NgoDashboard />;
-  if (hash === "#volunteer-dashboard") return <VolunteerDashboard />;
   if (hash === "#profile") return <Profile />;
+  
+  {/*NGO dashboard */}
+  if (hash === "#ngo-dashboard") return <NgoDashboard />;
 
+  
+  {/*Volunteer dashboard */}
+  if (hash === "#volunteer-dashboard") return <VolunteerDashboard />;
+
+  
+  {/*Admin dashboard */}
   if (hash === "#admin-dashboard") {
     const isAdmin = sessionStorage.getItem("foodshare_isAdmin") === "true";
     if (isAdmin) return <AdminDashboard />;
     window.location.hash = "#login";
     return null;
   }
+  if (hash === "#manage-user") return <ManageUser />
+  if (hash === "#manage-donations") return <ManageDonations />
+  if (hash === "#approve-ngos") return <ApproveNGOs />
+  if (hash === "#analytics") return <Analytics />
 
   return (
     <div className="min-h-screen bg-white text-ink">
