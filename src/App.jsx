@@ -28,6 +28,8 @@ import ManageUser from "./pages/dashboard/Admin/ManageUser.jsx";
 import ManageDonations from "./pages/dashboard/Admin/ManageDonations.jsx";
 import ApproveNGOs from "./pages/dashboard/Admin/ApproveNGOs.jsx"
 import Analytics from "./pages/dashboard/Admin/Analytics.jsx"
+import Reports from "./pages/dashboard/Admin/Reports.jsx";
+import AdminSettings from "./pages/dashboard/Admin/AdminSettings.jsx";
 
 {/*Volunteer Dashboard*/}
 import VolunteerDashboard from "./pages/dashboard/Volunteer/VolunteerDashboard.jsx";
@@ -92,6 +94,8 @@ export default function App() {
   if (hash === "#manage-donations") return <ManageDonations />
   if (hash === "#approve-ngos") return <ApproveNGOs />
   if (hash === "#analytics") return <Analytics />
+  if (hash === "#reports") return <Reports />
+  if (hash === "#admin-settings") return <AdminSettings />
 
   return (
     <div className="min-h-screen bg-white text-ink">

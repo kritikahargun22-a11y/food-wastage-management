@@ -26,8 +26,8 @@ const NAV_ITEMS = [
     { label: "Manage Donations", icon: Utensils, href: "#manage-donations" },
     { label: "Approve NGOs", icon: Building2, href: "#approve-ngos" },
     { label: "Analytics", icon: BarChart3, href: "#analytics" },
-    { label: "Reports", icon: FileText, href: "#reposts" },
-    { label: "Settings", icon: Settings, href: "#profile" },
+    { label: "Reports", icon: FileText, href: "#reports" },
+    { label: "Settings", icon: Settings, href: "#admin-settings" },
 ];
 
 function Sidebar({ open, onClose }) {
