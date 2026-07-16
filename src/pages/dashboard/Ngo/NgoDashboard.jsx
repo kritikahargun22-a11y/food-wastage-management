@@ -25,8 +25,8 @@ const NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, active: true, href: "#ngo-dashboard" },
   { label: "Available Donations", icon: PackageSearch, href: "#available-donation" },
   { label: "Manage Requests", icon: ClipboardList, href: "#manage-requests" },
-  { label: "Donation History", icon: History, href: "#" },
-  { label: "Notifications", icon: BellIcon, href: "#" },
+  { label: "Donation History", icon: History, href: "#ngo-donation-history" },
+  { label: "Notifications", icon: Bell, href: "#ngo-notifications" },
   { label: "Profile", icon: User, href: "#profile" },
 ];
 
