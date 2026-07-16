@@ -22,9 +22,9 @@ import {
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, active: true, href: "#ngo-dashboard" },
-  { label: "Available Donations", icon: PackageSearch, href: "#" },
-  { label: "Manage Requests", icon: ClipboardList, href: "#" },
+  { label: "Overview", icon: LayoutDashboard, active: true, href: "#ngo-dashboard" },
+  { label: "Available Donations", icon: PackageSearch, href: "#available-donation" },
+  { label: "Manage Requests", icon: ClipboardList, href: "#manage-requests" },
   { label: "Donation History", icon: History, href: "#" },
   { label: "Notifications", icon: BellIcon, href: "#" },
   { label: "Profile", icon: User, href: "#profile" },
