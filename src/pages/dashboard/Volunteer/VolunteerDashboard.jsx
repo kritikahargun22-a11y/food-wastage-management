@@ -23,7 +23,7 @@ import {
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, active: true, href: "#volunteer-dashboard" },
+  { label: "Overview", icon: LayoutDashboard, active: true, href: "#volunteer-dashboard" },
   { label: "Assigned Pickups", icon: Bike, href: "#" },
   { label: "Navigation", icon: NavigationIcon, href: "#" },
   { label: "Delivery History", icon: CheckCircle2, href: "#" },

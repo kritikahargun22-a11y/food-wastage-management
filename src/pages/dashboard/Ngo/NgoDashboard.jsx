@@ -5,7 +5,7 @@ import {
   PackageSearch,
   ClipboardList,
   History,
-  Bell as BellIcon,
+  Bell,
   User,
   LogOut,
   Leaf,
@@ -27,7 +27,7 @@ const NAV_ITEMS = [
   { label: "Manage Requests", icon: ClipboardList, href: "#manage-requests" },
   { label: "Donation History", icon: History, href: "#ngo-donation-history" },
   { label: "Notifications", icon: Bell, href: "#ngo-notifications" },
-  { label: "Profile", icon: User, href: "#profile" },
+  { label: "Settings", icon: User, href: "#ngo-settings" },
 ];
 
 function Sidebar({ open, onClose }) {
@@ -104,7 +104,6 @@ function DashboardHeader({ onMenuClick }) {
 
       <div className="flex items-center gap-4">
         <button className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent" aria-label="Notifications">
-          <BellIcon className="h-5 w-5 text-ink" />
           <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
         </button>
         <span className="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-200 to-emerald-500 flex items-center justify-center text-xs font-bold text-white">

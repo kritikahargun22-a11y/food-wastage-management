@@ -32,22 +32,30 @@ export default function Signup() {
     password: "",
     confirmPassword: "",
   });
-
   function handleChange(e) {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-  }
+  setForm((prev) => ({
+    ...prev,
+    [e.target.name]: e.target.value,
+  }));
+}
+function handleSubmit(e) {
+  e.preventDefault();
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    // UI only — connect to backend later.
-    console.log("Signup submitted:", { ...form, role, agree });
+  console.log("Signup submitted:", {
+    ...form,
+    role,
+    agree,
+  });
 
-    if (role === "ngo") {
-      window.location.hash = "#ngo-dashboard";
-    } else {
-      window.location.hash = "#dashboard";
-    }
+  if (role === "ngo") {
+    window.location.hash = "#ngo-dashboard";
+  } else if (role === "volunteer") {
+    window.location.hash = "#volunteer-dashboard";
+  } else {
+    window.location.hash = "#dashboard";
   }
+}
+ 
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-soft-radial bg-gray-50/40">

@@ -21,6 +21,7 @@ import AvailableDonation from "./pages/dashboard/Ngo/AvailableDonations.jsx"
 import ManageRequests from "./pages/dashboard/Ngo/ManageRequests.jsx";
 import NgoDonationHistory from "./pages/dashboard/Ngo/NgoDonationHistory.jsx";
 import NgoNotifications from "./pages/dashboard/Ngo/NgoNotifications.jsx";
+import NgoSettings from "./pages/dashboard/Ngo/NgoSettings.jsx";
 
 {/*Admin Dashboard*/}
 import AdminDashboard from "./pages/dashboard/Admin/AdminDashboard.jsx";
@@ -78,6 +79,7 @@ export default function App() {
   if (hash === "#manage-requests") return <ManageRequests />
   if (hash === "#ngo-donation-history") return <NgoDonationHistory />
   if (hash === "#ngo-notifications") return <NgoNotifications />
+  if (hash === "#ngo-settings") return <NgoSettings />
   
   {/*Volunteer dashboard */}
   if (hash === "#volunteer-dashboard") return <VolunteerDashboard />;
