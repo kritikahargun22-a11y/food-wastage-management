@@ -34,7 +34,11 @@ import AdminSettings from "./pages/dashboard/Admin/AdminSettings.jsx";
 
 {/*Volunteer Dashboard*/}
 import VolunteerDashboard from "./pages/dashboard/Volunteer/VolunteerDashboard.jsx";
-
+import AssignedPickups from "./pages/dashboard/Volunteer/AssignedPickups.jsx";
+import Navigation from "./pages/dashboard/Volunteer/Navigation.jsx";
+import DeliveryHistory from "./pages/dashboard/Volunteer/DeliveryHistory.jsx";
+import VolunteerNotifications from "./pages/dashboard/Volunteer/VolunteerNotifications.jsx";
+import VolunteerSettings from "./pages/dashboard/Volunteer/volunteerSettings.jsx";
 
 const Impact = lazy(() => import("./components/Impact.jsx"));
 const Testimonials = lazy(() => import("./components/Testimonials.jsx"));
@@ -83,6 +87,11 @@ export default function App() {
   
   {/*Volunteer dashboard */}
   if (hash === "#volunteer-dashboard") return <VolunteerDashboard />;
+  if(hash === "#assigned-pickups") return <AssignedPickups />;
+  if (hash === "#volunteer-navigation") return <Navigation />;
+  if (hash === "#volunteer-history") return <DeliveryHistory />;
+  if (hash === "#volunteer-notifications") return <VolunteerNotifications />;
+  if (hash === "#volunteer-settings") return <VolunteerSettings />;
 
   
   {/*Admin dashboard */}

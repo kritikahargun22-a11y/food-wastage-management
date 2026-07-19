@@ -6,6 +6,7 @@ import {
   Navigation as NavigationIcon,
   History,
   Bell as BellIcon,
+  Settings as SettingsIcon,
   User,
   LogOut,
   Leaf,
@@ -24,11 +25,12 @@ import {
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, active: true, href: "#volunteer-dashboard" },
-  { label: "Assigned Pickups", icon: Bike, href: "#" },
-  { label: "Navigation", icon: NavigationIcon, href: "#" },
-  { label: "Delivery History", icon: CheckCircle2, href: "#" },
-  { label: "Notifications", icon: BellIcon, href: "#" },
-  { label: "Profile", icon: User, href: "#profile" },
+  { label: "Assigned Pickups", icon: Bike, href: "#assigned-pickups" },
+  { label: "Navigation", icon: NavigationIcon, href: "#navigation" },
+  { label: "Delivery History", icon: CheckCircle2, href: "#delivery-history" },
+  { label: "Notifications", icon: BellIcon, href: "#volunteer-notifications" },
+  
+  { label: "Settings", icon: SettingsIcon, href: "#" },
 ];
 
 function Sidebar({ open, onClose, available, onToggleAvailable }) {

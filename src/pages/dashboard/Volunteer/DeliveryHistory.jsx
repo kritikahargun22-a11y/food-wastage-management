@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   Bike,
@@ -12,19 +12,18 @@ import {
   Leaf,
   Menu,
   X,
-  Phone,
-  MapPin,
-  Clock,
-  Package,
-  ArrowRight,
+  CheckCircle2,
+  Star,
+  Weight,
+  TrendingUp,
 } from "lucide-react";
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "#volunteer-dashboard" },
-  { label: "Assigned Pickups", icon: Bike, active: true, href: "#assigned-pickups" },
-  { label: "Navigation", icon: NavigationIcon, href: "#navigation" },
-  { label: "Delivery History", icon: History, href: "#delivery-history" },
+  { label: "Overview", icon: LayoutDashboard, href: "#volunteer-dashboard" },
+  { label: "Assigned Pickups", icon: Bike, href: "#assigned-pickups" },
+  { label: "Navigation", icon: NavigationIcon, href: "#volunteer-navigation" },
+  { label: "Delivery History", icon: History, active: true, href: "#delivery-history" },
   { label: "Notifications", icon: BellIcon, href: "#volunteer-notifications" },
   
   { label: "Settings", icon: SettingsIcon, href: "#" },
@@ -105,7 +104,7 @@ function DashboardHeader({ onMenuClick }) {
         <button onClick={onMenuClick} className="lg:hidden text-ink" aria-label="Open menu">
           <Menu className="h-6 w-6" />
         </button>
-        <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">Assigned Pickups</h1>
+        <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">Delivery History</h1>
       </div>
       <div className="flex items-center gap-4">
         <button className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent" aria-label="Notifications">
@@ -120,145 +119,58 @@ function DashboardHeader({ onMenuClick }) {
   );
 }
 
-/* ---------------- Pickups Data ---------------- */
-const STATUS_STYLES = {
-  "Picking Up": { bg: "bg-amber-100", text: "text-amber-700" },
-  Assigned: { bg: "bg-sky-100", text: "text-sky-700" },
-  Completed: { bg: "bg-emerald-100", text: "text-emerald-700" },
-};
-
-const FILTERS = ["All", "Assigned", "Picking Up", "Completed"];
-
-const INITIAL_PICKUPS = [
-  {
-    id: "1",
-    emoji: "🥗",
-    title: "Fresh Vegetable Crate",
-    donor: "Green Bowl Cafe",
-    ngo: "Hope Kitchen Trust",
-    distance: "1.2 km",
-    eta: "8 min",
-    status: "Picking Up",
-  },
-  {
-    id: "2",
-    emoji: "🍞",
-    title: "Bakery Surplus Box",
-    donor: "Sunrise Bakery",
-    ngo: "Seva Foundation",
-    distance: "3.4 km",
-    eta: "15 min",
-    status: "Assigned",
-  },
-  {
-    id: "3",
-    emoji: "🍛",
-    title: "Cooked Meal Trays",
-    donor: "Taj Banquet Hall",
-    ngo: "Anna Daan NGO",
-    distance: "4.8 km",
-    eta: "20 min",
-    status: "Assigned",
-  },
-  {
-    id: "4",
-    emoji: "🥛",
-    title: "Dairy Surplus Pack",
-    donor: "Green Valley Farms",
-    ngo: "Hope Kitchen Trust",
-    distance: "2.1 km",
-    eta: "—",
-    status: "Completed",
-  },
-];
-
-/* ---------------- Pickup Card ---------------- */
-function PickupCard({ pickup, onAdvance }) {
-  const s = STATUS_STYLES[pickup.status];
-  const nextAction =
-    pickup.status === "Assigned"
-      ? "Start Pickup"
-      : pickup.status === "Picking Up"
-      ? "Mark Picked Up"
-      : null;
-
+/* ---------------- Stat Card ---------------- */
+function StatCard({ icon: Icon, iconBg, value, label, trend, delay }) {
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="card p-5"
+      transition={{ duration: 0.4, delay }}
+      whileHover={{ y: -4 }}
+      className="card p-6"
     >
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div className="flex items-start gap-3 min-w-0">
-          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-2xl flex-shrink-0">
-            {pickup.emoji}
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-ink mb-1">{pickup.title}</p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-              <span className="flex items-center gap-1">
-                <Package className="h-3.5 w-3.5" aria-hidden="true" /> {pickup.donor} → {pickup.ngo}
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" aria-hidden="true" /> {pickup.distance}
-              </span>
-              {pickup.eta !== "—" && (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" aria-hidden="true" /> ETA {pickup.eta}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <span className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase ${s.bg} ${s.text}`}>
-          {pickup.status}
+      <div className="flex items-center justify-between mb-4">
+        <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconBg}`}>
+          <Icon className="h-5 w-5 text-white" aria-hidden="true" />
         </span>
+        {trend && (
+          <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 rounded-full px-2.5 py-1">
+            <TrendingUp className="h-3 w-3" /> {trend}
+          </span>
+        )}
       </div>
-
-      {pickup.status !== "Completed" && (
-        <div className="flex gap-2 mt-4">
-          <button className="flex items-center gap-2 rounded-xl border border-gray-200 text-ink text-xs font-semibold px-4 py-2.5 hover:bg-gray-50 transition">
-            <Phone className="h-3.5 w-3.5" aria-hidden="true" />
-            Call Donor
-          </button>
-          {nextAction && (
-            <button
-              onClick={() => onAdvance(pickup.id)}
-              className="flex items-center gap-2 rounded-xl bg-green-gradient text-white text-xs font-semibold px-4 py-2.5 hover:opacity-90 transition"
-            >
-              {nextAction}
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-            </button>
-          )}
-        </div>
-      )}
+      <div className="text-2xl font-extrabold text-primary-darker tracking-tight">{value}</div>
+      <p className="mt-1 text-sm text-muted font-medium">{label}</p>
     </motion.div>
   );
 }
 
-/* ---------------- Pickups List ---------------- */
-function PickupsList() {
-  const [pickups, setPickups] = useState(INITIAL_PICKUPS);
+/* ---------------- History Table ---------------- */
+const FILTERS = ["All", "This Week", "This Month"];
+
+const DELIVERIES = [
+  { id: "PU-1042", food: "Fresh Vegetable Crate", donor: "Green Bowl Cafe", ngo: "Hope Kitchen Trust", rating: 5, date: "Jul 05" },
+  { id: "PU-1039", food: "Cooked Meal Trays", donor: "Taj Banquet Hall", ngo: "Anna Daan NGO", rating: 5, date: "Jul 04" },
+  { id: "PU-1035", food: "Bakery Surplus Box", donor: "Sunrise Bakery", ngo: "Seva Foundation", rating: 4, date: "Jul 02" },
+  { id: "PU-1030", food: "Dairy Surplus Pack", donor: "Green Valley Farms", ngo: "Hope Kitchen Trust", rating: 5, date: "Jun 30" },
+  { id: "PU-1024", food: "Grain & Rice Sacks", donor: "City Wholesale Mart", ngo: "Anna Daan NGO", rating: 5, date: "Jun 27" },
+  { id: "PU-1018", food: "Beverage Crates", donor: "Cafe Aroma", ngo: "Seva Foundation", rating: 4, date: "Jun 24" },
+];
+
+function DeliveryHistoryTable() {
   const [filter, setFilter] = useState("All");
 
-  function advance(id) {
-    setPickups((list) =>
-      list.map((p) => {
-        if (p.id !== id) return p;
-        if (p.status === "Assigned") return { ...p, status: "Picking Up" };
-        if (p.status === "Picking Up") return { ...p, status: "Completed" };
-        return p;
-      })
-    );
-  }
-
-  const filtered = pickups.filter((p) => filter === "All" || p.status === filter);
-
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.2 }}
+      className="card p-7"
+    >
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <h2 className="text-lg font-bold text-primary-darker">Completed Deliveries</h2>
+      </div>
+
       <div className="flex gap-2 flex-wrap mb-6">
         {FILTERS.map((f) => (
           <button
@@ -275,23 +187,43 @@ function PickupsList() {
         ))}
       </div>
 
-      <div className="space-y-4">
-        <AnimatePresence>
-          {filtered.map((pickup) => (
-            <PickupCard key={pickup.id} pickup={pickup} onAdvance={advance} />
-          ))}
-        </AnimatePresence>
-
-        {filtered.length === 0 && (
-          <p className="text-sm text-muted text-center py-16">No pickups in this category.</p>
-        )}
+      <div className="overflow-x-auto -mx-2">
+        <table className="w-full text-sm min-w-[640px]">
+          <thead>
+            <tr className="text-left text-xs font-bold uppercase tracking-wide text-muted">
+              <th className="px-2 pb-3">ID</th>
+              <th className="px-2 pb-3">Food</th>
+              <th className="px-2 pb-3">Donor</th>
+              <th className="px-2 pb-3">NGO</th>
+              <th className="px-2 pb-3">Rating</th>
+              <th className="px-2 pb-3">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {DELIVERIES.map((d) => (
+              <tr key={d.id} className="border-t border-gray-100">
+                <td className="px-2 py-3.5 font-mono text-xs text-muted">{d.id}</td>
+                <td className="px-2 py-3.5 font-semibold text-ink">{d.food}</td>
+                <td className="px-2 py-3.5 text-ink/80">{d.donor}</td>
+                <td className="px-2 py-3.5 text-ink/80">{d.ngo}</td>
+                <td className="px-2 py-3.5">
+                  <span className="flex items-center gap-1 text-amber-500">
+                    <Star className="h-3.5 w-3.5 fill-amber-400" aria-hidden="true" />
+                    <span className="text-ink font-semibold text-xs">{d.rating}.0</span>
+                  </span>
+                </td>
+                <td className="px-2 py-3.5 text-ink/60 font-mono text-xs">{d.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 /* ---------------- Main Page ---------------- */
-export default function AssignedPickups() {
+export default function VolunteerHistory() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [available, setAvailable] = useState(true);
 
@@ -307,8 +239,14 @@ export default function AssignedPickups() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 px-6 py-8 max-w-4xl w-full mx-auto">
-          <PickupsList />
+        <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
+            <StatCard icon={CheckCircle2} iconBg="bg-emerald-500" value="86" label="Total Deliveries" trend="+6" delay={0} />
+            <StatCard icon={Weight} iconBg="bg-orange-500" value="640 kg" label="Food Delivered" trend="+45 kg" delay={0.05} />
+            <StatCard icon={Star} iconBg="bg-amber-500" value="4.9" label="Average Rating" delay={0.1} />
+          </div>
+
+          <DeliveryHistoryTable />
         </main>
       </div>
     </div>
