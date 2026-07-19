@@ -14,17 +14,54 @@ import {
   Bike,
 } from "lucide-react";
 
+import { auth, db } from "../Backend/firebase";
+
+import { createUserWithEmailAndPassword } from "firebase/auth";
+
+import {
+  doc,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+
 const ROLES = [
-  { id: "donor", label: "Donor", desc: "Give surplus food", icon: PackageOpen, color: "text-emerald-600" },
-  { id: "ngo", label: "NGO", desc: "Receive & distribute", icon: Building2, color: "text-sky-600" },
-  { id: "volunteer", label: "Volunteer", desc: "Handle pickups", icon: Bike, color: "text-amber-600" },
+  {
+    id: "donor",
+    label: "Donor",
+    desc: "Give surplus food",
+    icon: PackageOpen,
+    color: "text-emerald-600",
+  },
+  {
+    id: "ngo",
+    label: "NGO",
+    desc: "Receive & distribute",
+    icon: Building2,
+    color: "text-sky-600",
+  },
+  {
+    id: "volunteer",
+    label: "Volunteer",
+    desc: "Handle pickups",
+    icon: Bike,
+    color: "text-amber-600",
+  },
 ];
 
 export default function Signup() {
+
   const [role, setRole] = useState("donor");
+
   const [showPassword, setShowPassword] = useState(false);
+
   const [showConfirm, setShowConfirm] = useState(false);
+
   const [agree, setAgree] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState("");
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -32,30 +69,82 @@ export default function Signup() {
     password: "",
     confirmPassword: "",
   });
+
   function handleChange(e) {
-  setForm((prev) => ({
-    ...prev,
-    [e.target.name]: e.target.value,
-  }));
-}
-function handleSubmit(e) {
-  e.preventDefault();
-
-  console.log("Signup submitted:", {
-    ...form,
-    role,
-    agree,
-  });
-
-  if (role === "ngo") {
-    window.location.hash = "#ngo-dashboard";
-  } else if (role === "volunteer") {
-    window.location.hash = "#volunteer-dashboard";
-  } else {
-    window.location.hash = "#dashboard";
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   }
-}
- 
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    setError("");
+
+    // Validate passwords
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    // Validate Terms checkbox
+    if (!agree) {
+      setError("Please accept the Terms and Privacy Policy.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Create Firebase Authentication account
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
+
+      const user = userCredential.user;
+
+      // Save user details in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        role: role,
+        createdAt: serverTimestamp(),
+      });
+
+      // Redirect based on role
+      if (role === "ngo") {
+        window.location.hash = "#ngo-dashboard";
+      } else if (role === "volunteer") {
+        window.location.hash = "#volunteer-dashboard";
+      } else {
+        window.location.hash = "#dashboard";
+      }
+
+    } catch (error) {
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          setError("This email is already registered.");
+          break;
+
+        case "auth/invalid-email":
+          setError("Please enter a valid email.");
+          break;
+
+        case "auth/weak-password":
+          setError("Password must be at least 6 characters.");
+          break;
+
+        default:
+          setError(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-soft-radial bg-gray-50/40">
@@ -100,11 +189,10 @@ function handleSubmit(e) {
                 type="button"
                 onClick={() => setRole(r.id)}
                 aria-pressed={role === r.id}
-                className={`flex flex-col items-center text-center rounded-xl border-2 px-3 py-4 transition ${
-                  role === r.id
-                    ? "border-primary bg-accent"
-                    : "border-gray-200 hover:border-primary/40"
-                }`}
+                className={`flex flex-col items-center text-center rounded-xl border-2 px-3 py-4 transition ${role === r.id
+                  ? "border-primary bg-accent"
+                  : "border-gray-200 hover:border-primary/40"
+                  }`}
               >
                 <r.icon className={`h-6 w-6 mb-2 ${role === r.id ? r.color : "text-muted"}`} aria-hidden="true" />
                 <span className="text-sm font-bold text-ink">{r.label}</span>
@@ -258,13 +346,21 @@ function handleSubmit(e) {
             </span>
           </label>
 
+          {error && (
+            <div className="rounded-lg bg-red-100 border border-red-300 p-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           <motion.button
+
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
+            disabled={loading}
             className="w-full btn btn-primary justify-center text-base"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </motion.button>
         </form>
