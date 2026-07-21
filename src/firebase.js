@@ -9,6 +9,7 @@ const firebaseConfig = {
   storageBucket: "foodshare-app-a7e6d.firebasestorage.app",
   messagingSenderId: "1062582950721",
   appId: "1:1062582950721:web:efbf5162f2bdf730049fc0",
+  measurementId: "G-K4969CBSPM",
 };
 
 const app = initializeApp(firebaseConfig);
