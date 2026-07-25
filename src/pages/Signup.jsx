@@ -12,56 +12,24 @@ import {
   PackageOpen,
   Building2,
   Bike,
+  AlertCircle,
 } from "lucide-react";
-
-import { auth, db } from "../Backend/firebase";
-
-import { createUserWithEmailAndPassword } from "firebase/auth";
-
-import {
-  doc,
-  setDoc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const ROLES = [
-  {
-    id: "donor",
-    label: "Donor",
-    desc: "Give surplus food",
-    icon: PackageOpen,
-    color: "text-emerald-600",
-  },
-  {
-    id: "ngo",
-    label: "NGO",
-    desc: "Receive & distribute",
-    icon: Building2,
-    color: "text-sky-600",
-  },
-  {
-    id: "volunteer",
-    label: "Volunteer",
-    desc: "Handle pickups",
-    icon: Bike,
-    color: "text-amber-600",
-  },
+  { id: "donor", label: "Donor", desc: "Give surplus food", icon: PackageOpen, color: "text-emerald-600" },
+  { id: "ngo", label: "NGO", desc: "Receive & distribute", icon: Building2, color: "text-sky-600" },
+  { id: "volunteer", label: "Volunteer", desc: "Handle pickups", icon: Bike, color: "text-amber-600" },
 ];
 
 export default function Signup() {
-
+  const { signup } = useAuth();
   const [role, setRole] = useState("donor");
-
   const [showPassword, setShowPassword] = useState(false);
-
   const [showConfirm, setShowConfirm] = useState(false);
-
   const [agree, setAgree] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
-
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -71,50 +39,32 @@ export default function Signup() {
   });
 
   function handleChange(e) {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
+
   async function handleSubmit(e) {
     e.preventDefault();
-
     setError("");
 
-    // Validate passwords
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-
-    // Validate Terms checkbox
-    if (!agree) {
-      setError("Please accept the Terms and Privacy Policy.");
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-
-      // Create Firebase Authentication account
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        form.email,
-        form.password
-      );
-
-      const user = userCredential.user;
-
-      // Save user details in Firestore
-      await setDoc(doc(db, "users", user.uid), {
+      await signup({
         name: form.name,
         email: form.email,
+        password: form.password,
         phone: form.phone,
-        role: role,
-        createdAt: serverTimestamp(),
+        role,
       });
 
-      // Redirect based on role
       if (role === "ngo") {
         window.location.hash = "#ngo-dashboard";
       } else if (role === "volunteer") {
@@ -122,29 +72,19 @@ export default function Signup() {
       } else {
         window.location.hash = "#dashboard";
       }
-
-    } catch (error) {
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          setError("This email is already registered.");
-          break;
-
-        case "auth/invalid-email":
-          setError("Please enter a valid email.");
-          break;
-
-        case "auth/weak-password":
-          setError("Password must be at least 6 characters.");
-          break;
-
-        default:
-          setError(error.message);
+    } catch (err) {
+      if (err.code === "auth/email-already-in-use") {
+        setError("An account with this email already exists.");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Please enter a valid email address.");
+      } else {
+        setError("Something went wrong. Please try again.");
       }
+      console.error(err);
     } finally {
       setLoading(false);
     }
   }
-
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-soft-radial bg-gray-50/40">
@@ -154,7 +94,6 @@ export default function Signup() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-lg bg-white rounded-card shadow-lift px-8 py-10 sm:px-10"
       >
-        {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-6">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-gradient shadow-soft">
             <Leaf className="h-5 w-5 text-white" strokeWidth={2.2} aria-hidden="true" />
@@ -169,19 +108,14 @@ export default function Signup() {
           Join as a donor, NGO, or volunteer — free, always.
         </p>
 
-        {/* Step indicator (cosmetic) */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white text-xs font-bold">
-            1
-          </span>
-          <span className="h-px w-10 bg-gray-200" />
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-muted text-xs font-bold">
-            2
-          </span>
-        </div>
+        {error && (
+          <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-100 px-4 py-3 mb-5 text-sm text-red-600">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Role picker */}
           <div className="grid grid-cols-3 gap-3">
             {ROLES.map((r) => (
               <button
@@ -189,10 +123,9 @@ export default function Signup() {
                 type="button"
                 onClick={() => setRole(r.id)}
                 aria-pressed={role === r.id}
-                className={`flex flex-col items-center text-center rounded-xl border-2 px-3 py-4 transition ${role === r.id
-                  ? "border-primary bg-accent"
-                  : "border-gray-200 hover:border-primary/40"
-                  }`}
+                className={`flex flex-col items-center text-center rounded-xl border-2 px-3 py-4 transition ${
+                  role === r.id ? "border-primary bg-accent" : "border-gray-200 hover:border-primary/40"
+                }`}
               >
                 <r.icon className={`h-6 w-6 mb-2 ${role === r.id ? r.color : "text-muted"}`} aria-hidden="true" />
                 <span className="text-sm font-bold text-ink">{r.label}</span>
@@ -201,7 +134,6 @@ export default function Signup() {
             ))}
           </div>
 
-          {/* Full name */}
           <div>
             <label htmlFor="name" className="block text-sm font-semibold text-ink mb-1.5">
               Full name
@@ -222,7 +154,6 @@ export default function Signup() {
             </div>
           </div>
 
-          {/* Email + phone */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-ink mb-1.5">
@@ -265,7 +196,6 @@ export default function Signup() {
             </div>
           </div>
 
-          {/* Password + confirm */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-ink mb-1.5">
@@ -278,7 +208,7 @@ export default function Signup() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  minLength={8}
+                  minLength={6}
                   autoComplete="new-password"
                   value={form.password}
                   onChange={handleChange}
@@ -306,7 +236,7 @@ export default function Signup() {
                   name="confirmPassword"
                   type={showConfirm ? "text" : "password"}
                   required
-                  minLength={8}
+                  minLength={6}
                   autoComplete="new-password"
                   value={form.confirmPassword}
                   onChange={handleChange}
@@ -324,7 +254,6 @@ export default function Signup() {
             </div>
           </div>
 
-          {/* Terms */}
           <label className="flex items-start gap-2.5 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -346,22 +275,15 @@ export default function Signup() {
             </span>
           </label>
 
-          {error && (
-            <div className="rounded-lg bg-red-100 border border-red-300 p-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
           <motion.button
-
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full btn btn-primary justify-center text-base"
+            className="w-full btn btn-primary justify-center text-base disabled:opacity-60"
           >
-            {loading ? "Creating Account..." : "Create Account"}
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            {loading ? "Creating account..." : "Create Account"}
+            {!loading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
           </motion.button>
         </form>
 
