@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import toast from "react-hot-toast";
 
 const ROLES = [
   { id: "donor", label: "Donor", desc: "Give surplus food", icon: PackageOpen, color: "text-emerald-600" },
@@ -43,28 +44,35 @@ export default function Signup() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (form.password !== form.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (form.password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
+  if (form.password !== form.confirmPassword) {
+    setError("Passwords do not match.");
+    toast.error("Passwords do not match.");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      await signup({
-        name: form.name,
-        email: form.email,
-        password: form.password,
-        phone: form.phone,
-        role,
-      });
+  if (form.password.length < 6) {
+    setError("Password must be at least 6 characters.");
+    toast.error("Password must be at least 6 characters.");
+    return;
+  }
 
+  setLoading(true);
+
+  try {
+    await signup({
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      phone: form.phone,
+      role,
+    });
+
+    toast.success("Account created successfully!");
+
+    setTimeout(() => {
       if (role === "ngo") {
         window.location.hash = "#ngo-dashboard";
       } else if (role === "volunteer") {
@@ -72,19 +80,26 @@ export default function Signup() {
       } else {
         window.location.hash = "#dashboard";
       }
-    } catch (err) {
-      if (err.code === "auth/email-already-in-use") {
-        setError("An account with this email already exists.");
-      } else if (err.code === "auth/invalid-email") {
-        setError("Please enter a valid email address.");
-      } else {
-        setError("Something went wrong. Please try again.");
-      }
-      console.error(err);
-    } finally {
-      setLoading(false);
+    }, 1200);
+
+  } catch (err) {
+    if (err.code === "auth/email-already-in-use") {
+      setError("An account with this email already exists.");
+      toast.error("Email already exists.");
+    } else if (err.code === "auth/invalid-email") {
+      setError("Please enter a valid email address.");
+      toast.error("Invalid email address.");
+    } else {
+      setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong.");
     }
+
+    console.error(err);
+
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-soft-radial bg-gray-50/40">
