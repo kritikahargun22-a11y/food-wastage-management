@@ -14,7 +14,7 @@ import {
   Bike,
 } from "lucide-react";
 
-import { auth, db } from "../Backend/firebase";
+import { auth, db } from "../firebase";
 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
