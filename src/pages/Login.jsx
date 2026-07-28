@@ -1,68 +1,79 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Smartphone } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Smartphone, AlertCircle } from "lucide-react";
 import AuthLayout from "../components/AuthLayout.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import toast from "react-hot-toast";
 
-const ROLES = ["Donor", "NGO", "Volunteer"];
-
-// Demo-only admin credentials — replace with real backend auth later.
-const ADMIN_EMAIL = "admin@foodshare.com";
-const ADMIN_PASSWORD = "Admin@123";
 
 export default function Login() {
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState("Donor");
   const [form, setForm] = useState({ email: "", password: "" });
   const [remember, setRemember] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    console.log("Login submitted:", { ...form, remember, role });
+    setError("");
+    setLoading(true);
 
-    // Admin check first — takes priority over role toggle
-    if (form.email === ADMIN_EMAIL && form.password === ADMIN_PASSWORD) {
-      sessionStorage.setItem("foodshare_isAdmin", "true");
-      window.location.hash = "#admin-dashboard";
-      return;
-    }
+    try {
+      const { profile } = await login(form.email, form.password);
+      toast.success("Login successful!");
 
-    // Normal Donor / NGO / Volunteer login
-    sessionStorage.removeItem("foodshare_isAdmin");
-    
-  if (role === "NGO") {
-  window.location.hash = "#ngo-dashboard";
-} else if (role === "Volunteer") {
-  window.location.hash = "#volunteer-dashboard";
+      if (!profile) {
+        setError("Account found but no profile data — please contact support.");
+        setLoading(false);
+        return;
+      }
+
+      if (profile.role === "admin") {
+        sessionStorage.setItem("foodshare_isAdmin", "true");
+        window.location.hash = "#admin-dashboard";
+      } else if (profile.role === "ngo") {
+        window.location.hash = "#ngo-dashboard";
+      } else if (profile.role === "volunteer") {
+        window.location.hash = "#volunteer-dashboard";
+      } else {
+        window.location.hash = "#dashboard";
+      }
+    } catch (err) {
+      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+  
+  toast.error("Incorrect email or password.");
+} else if (err.code === "auth/invalid-email") {
+  
+  toast.error("Please enter a valid email address.");
+} else if (err.code === "auth/too-many-requests") {
+  
+  toast.error("Too many attempts. Please try again later.");
 } else {
-  window.location.hash = "#dashboard";
+  
+  toast.error("Something went wrong. Please try again.");
 }
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
+
   return (
     <AuthLayout
       title="Log in"
       subtitle="Enter your credentials to access your dashboard."
     >
-      {/* Role toggle */}
-      <div className="grid grid-cols-3 gap-2 mb-6">
-        {ROLES.map((r) => (
-          <button
-            key={r}
-            type="button"
-            onClick={() => setRole(r)}
-            className={`rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
-              role === r
-                ? "border-primary bg-accent text-primary-dark"
-                : "border-gray-200 text-muted hover:border-primary/40"
-            }`}
-          >
-            {r}
-          </button>
-        ))}
-      </div>
+      {error && (
+        <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-100 px-4 py-3 mb-5 text-sm text-red-600">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         <div>
@@ -132,33 +143,12 @@ export default function Login() {
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.98 }}
           type="submit"
-          className="w-full btn btn-primary justify-center text-base"
+          disabled={loading}
+          className="w-full btn btn-primary justify-center text-base disabled:opacity-60"
         >
-          Log In
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          {loading ? "Logging in..." : "Log In"}
+          {!loading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
         </motion.button>
-
-        <div className="flex items-center gap-3 py-1">
-          <span className="h-px flex-1 bg-gray-200" />
-          <span className="text-xs font-medium text-muted">or continue with</span>
-          <span className="h-px flex-1 bg-gray-200" />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <button type="button" className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-ink hover:bg-accent transition">
-            <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.47c-.28 1.5-1.13 2.77-2.4 3.62v3h3.87c2.27-2.09 3.55-5.17 3.55-8.65z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.92l-3.87-3c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.96H1.28v3.1C3.25 21.3 7.31 24 12 24z"/>
-              <path fill="#FBBC05" d="M5.27 14.27A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.37-2.27v-3.1H1.28A11.98 11.98 0 0 0 0 12c0 1.93.46 3.76 1.28 5.37l3.99-3.1z"/>
-              <path fill="#EA4335" d="M12 4.77c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.94 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.28 6.63l3.99 3.1C6.22 6.88 8.87 4.77 12 4.77z"/>
-            </svg>
-            Google
-          </button>
-          <button type="button" className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-ink hover:bg-accent transition">
-            <Smartphone className="h-4 w-4 text-primary-dark" aria-hidden="true" />
-            Phone OTP
-          </button>
-        </div>
       </form>
 
       <p className="mt-8 text-center text-sm text-muted">
@@ -169,4 +159,4 @@ export default function Login() {
       </p>
     </AuthLayout>
   );
-  }
+}
