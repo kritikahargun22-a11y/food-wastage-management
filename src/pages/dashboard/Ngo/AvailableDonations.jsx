@@ -15,17 +15,9 @@ import {
   Timer,
   Loader2,
 } from "lucide-react";
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  doc,
-  updateDoc,
-  orderBy,
-} from "firebase/firestore";
-import { db } from "../../firebase.js";
-import { useAuth } from "../../context/AuthContext.jsx";
+
+import { db } from "../../../firebase.js";
+import { useAuth } from "../../../context/AuthContext.jsx";
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [

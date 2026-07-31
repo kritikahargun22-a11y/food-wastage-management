@@ -25,7 +25,7 @@ export default function Login() {
 
     try {
       const { profile } = await login(form.email, form.password);
-      toast.success("Login successful!");
+
 
       if (!profile) {
         setError("Account found but no profile data — please contact support.");
@@ -44,19 +44,22 @@ export default function Login() {
         window.location.hash = "#dashboard";
       }
     } catch (err) {
-      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+      console.error(err);
 
-        toast.error("Incorrect email or password.");
+      if (
+        err.code === "auth/invalid-credential" ||
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/user-not-found"
+      ) {
+        setError("Incorrect email or password.");
       } else if (err.code === "auth/invalid-email") {
-
-        toast.error("Please enter a valid email address.");
+        setError("Please enter a valid email address.");
       } else if (err.code === "auth/too-many-requests") {
-
-        toast.error("Too many attempts. Please try again later.");
+        setError("Too many attempts. Please try again later.");
       } else {
-
-        toast.error("Something went wrong. Please try again.");
+        setError(err.message);
       }
+
       console.error(err);
     } finally {
       setLoading(false);
