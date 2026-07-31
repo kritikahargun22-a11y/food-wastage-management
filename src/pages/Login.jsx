@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Smartphone, AlertCircle } from "lucide-react";
 import AuthLayout from "../components/AuthLayout.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import toast from "react-hot-toast";
+
 
 
 export default function Login() {
@@ -45,18 +45,18 @@ export default function Login() {
       }
     } catch (err) {
       if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
-  
-  toast.error("Incorrect email or password.");
-} else if (err.code === "auth/invalid-email") {
-  
-  toast.error("Please enter a valid email address.");
-} else if (err.code === "auth/too-many-requests") {
-  
-  toast.error("Too many attempts. Please try again later.");
-} else {
-  
-  toast.error("Something went wrong. Please try again.");
-}
+
+        toast.error("Incorrect email or password.");
+      } else if (err.code === "auth/invalid-email") {
+
+        toast.error("Please enter a valid email address.");
+      } else if (err.code === "auth/too-many-requests") {
+
+        toast.error("Too many attempts. Please try again later.");
+      } else {
+
+        toast.error("Something went wrong. Please try again.");
+      }
       console.error(err);
     } finally {
       setLoading(false);
