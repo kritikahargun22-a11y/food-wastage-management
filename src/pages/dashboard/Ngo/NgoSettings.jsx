@@ -21,7 +21,7 @@ import {
   Trash2,
   AlertTriangle,
 } from "lucide-react";
-
+import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "#ngo-dashboard" },
@@ -33,6 +33,7 @@ const NAV_ITEMS = [
 ];
 
 function Sidebar({ open, onClose }) {
+  const handleLogout = useLogout();
   return (
     <>
       {open && (
@@ -43,9 +44,8 @@ function Sidebar({ open, onClose }) {
         />
       )}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         <div className="flex items-center justify-between px-6 h-20 border-b border-gray-100">
           <a href="#home" className="flex items-center gap-2.5" aria-label="FoodShare home">
@@ -64,11 +64,10 @@ function Sidebar({ open, onClose }) {
             <a
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                item.active
-                  ? "bg-accent text-primary-dark"
-                  : "text-muted hover:bg-gray-50 hover:text-ink"
-              }`}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
+                ? "bg-accent text-primary-dark"
+                : "text-muted hover:bg-gray-50 hover:text-ink"
+                }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
               {item.label}
@@ -82,13 +81,13 @@ function Sidebar({ open, onClose }) {
         </div>
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
-          <a
-            href="#logout"
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
           >
             <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
             Log Out
-          </a>
+          </button>
         </div>
       </aside>
     </>
@@ -124,9 +123,8 @@ function ToggleRow({ label, desc, checked, onChange }) {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${
-          checked ? "bg-primary" : "bg-gray-200"
-        }`}
+        className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${checked ? "bg-primary" : "bg-gray-200"
+          }`}
       >
         <motion.span
           layout
@@ -340,11 +338,10 @@ function RegionalPreferences() {
           <button
             key={lang}
             onClick={() => setLanguage(lang)}
-            className={`flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-              language === lang
-                ? "border-primary bg-accent text-primary-dark"
-                : "border-gray-200 text-muted hover:border-primary/40"
-            }`}
+            className={`flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm font-semibold transition ${language === lang
+              ? "border-primary bg-accent text-primary-dark"
+              : "border-gray-200 text-muted hover:border-primary/40"
+              }`}
           >
             <Globe className="h-3.5 w-3.5" aria-hidden="true" />
             {lang}

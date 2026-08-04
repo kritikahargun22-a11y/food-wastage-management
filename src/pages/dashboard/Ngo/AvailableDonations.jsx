@@ -15,14 +15,22 @@ import {
   Timer,
   Loader2,
 } from "lucide-react";
-
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  updateDoc,
+  orderBy,
+} from "firebase/firestore";
 import { db } from "../../../firebase.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
-
+import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "#ngo-dashboard" },
-  { label: "Available Donations", icon: PackageSearch, active: true, href: "#available-donation" },
+  { label: "Available Donations", icon: PackageSearch, active: true, href: "#available-donations" },
   { label: "Manage Requests", icon: ClipboardList, href: "#manage-requests" },
   { label: "Donation History", icon: History, href: "#ngo-donation-history" },
   { label: "Notifications", icon: Bell, href: "#ngo-notifications" },
@@ -30,6 +38,7 @@ const NAV_ITEMS = [
 ];
 
 function Sidebar({ open, onClose }) {
+  const handleLogout = useLogout();
   return (
     <>
       {open && (
@@ -73,13 +82,13 @@ function Sidebar({ open, onClose }) {
         </div>
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
-          <a
-            href="#logout"
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
           >
             <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
             Log Out
-          </a>
+          </button>
         </div >
       </aside >
     </>

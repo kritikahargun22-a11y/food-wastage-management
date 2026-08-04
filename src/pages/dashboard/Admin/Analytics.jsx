@@ -20,7 +20,7 @@ import {
   Check,
   XCircle,
 } from "lucide-react";
-
+import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "#admin-dashboard" },
@@ -33,15 +33,15 @@ const NAV_ITEMS = [
 ];
 
 function Sidebar({ open, onClose }) {
+  const handleLogout = useLogout();
   return (
     <>
       {open && (
         <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={onClose} aria-hidden="true" />
       )}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         <div className="flex items-center justify-between px-6 h-20 border-b border-gray-100">
           <a href="#home" className="flex items-center gap-2.5" aria-label="FoodShare home">
@@ -65,11 +65,10 @@ function Sidebar({ open, onClose }) {
             <a
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                item.active
-                  ? "bg-accent text-primary-dark"
-                  : "text-muted hover:bg-gray-50 hover:text-ink"
-              }`}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
+                ? "bg-accent text-primary-dark"
+                : "text-muted hover:bg-gray-50 hover:text-ink"
+                }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
               {item.label}
@@ -84,10 +83,7 @@ function Sidebar({ open, onClose }) {
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
           <button
-            onClick={() => {
-              sessionStorage.removeItem("foodshare_isAdmin");
-              window.location.hash = "#login";
-            }}
+            onClick={handleLogout}
             className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
           >
             <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
@@ -124,125 +120,125 @@ function DashboardHeader({ onMenuClick }) {
 
 /* ---------------- Donations Trend (line chart) ---------------- */
 function DonationsTrend() {
-    const days = 14;
-    const meals = [20, 28, 24, 35, 32, 42, 38, 48, 44, 52, 49, 58, 55, 64];
-    const kg = [10, 12, 11, 16, 15, 18, 17, 22, 20, 24, 22, 27, 25, 30];
+  const days = 14;
+  const meals = [20, 28, 24, 35, 32, 42, 38, 48, 44, 52, 49, 58, 55, 64];
+  const kg = [10, 12, 11, 16, 15, 18, 17, 22, 20, 24, 22, 27, 25, 30];
 
-    const max = Math.max(...meals);
-    const toPoints = (arr) =>
-        arr
-            .map((v, i) => {
-                const x = (i / (arr.length - 1)) * 100;
-                const y = 100 - (v / max) * 90;
-                return `${x},${y}`;
-            })
-            .join(" ");
+  const max = Math.max(...meals);
+  const toPoints = (arr) =>
+    arr
+      .map((v, i) => {
+        const x = (i / (arr.length - 1)) * 100;
+        const y = 100 - (v / max) * 90;
+        return `${x},${y}`;
+      })
+      .join(" ");
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="card p-7"
-        >
-            <h2 className="text-lg font-bold text-primary-darker mb-6">Donations Trend (30 days)</h2>
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-56">
-                <line x1="0" y1="90" x2="100" y2="90" stroke="#F1F5F2" strokeWidth="0.5" />
-                <motion.polyline
-                    points={toPoints(meals)}
-                    fill="none"
-                    stroke="#16A34A"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
-                />
-                
-   
-<polyline
-                    points={toPoints(kg)}
-                    fill="none"
-                    stroke="#F97316"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeDasharray="2"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                />
-            </svg>
-            <div className="flex items-center gap-6 mt-2">
-                <span className="flex items-center gap-2 text-xs font-semibold text-muted">
-                    <span className="h-2.5 w-2.5 rounded-full bg-primary" /> Meals saved
-                </span>
-                <span className="flex items-center gap-2 text-xs font-semibold text-muted">
-                    <span className="h-2.5 w-2.5 rounded-full bg-orange-500" /> Kg rescued
-                </span>
-            </div>
-        </motion.div>
-    );
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.2 }}
+      className="card p-7"
+    >
+      <h2 className="text-lg font-bold text-primary-darker mb-6">Donations Trend (30 days)</h2>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-56">
+        <line x1="0" y1="90" x2="100" y2="90" stroke="#F1F5F2" strokeWidth="0.5" />
+        <motion.polyline
+          points={toPoints(meals)}
+          fill="none"
+          stroke="#16A34A"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        />
+
+
+        <polyline
+          points={toPoints(kg)}
+          fill="none"
+          stroke="#F97316"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="2"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
+      </svg>
+      <div className="flex items-center gap-6 mt-2">
+        <span className="flex items-center gap-2 text-xs font-semibold text-muted">
+          <span className="h-2.5 w-2.5 rounded-full bg-primary" /> Meals saved
+        </span>
+        <span className="flex items-center gap-2 text-xs font-semibold text-muted">
+          <span className="h-2.5 w-2.5 rounded-full bg-orange-500" /> Kg rescued
+        </span>
+      </div>
+    </motion.div>
+  );
 }
 
 /* ---------------- Donation Status Donut ---------------- */
 const STATUS_BREAKDOWN = [
-    { label: "Delivered", pct: 45, color: "#16A34A" },
-    { label: "In Transit", pct: 20, color: "#0EA5E9" },
-    { label: "Claimed", pct: 17, color: "#F59E0B" },
-    { label: "Expired", pct: 18, color: "#EF4444" },
+  { label: "Delivered", pct: 45, color: "#16A34A" },
+  { label: "In Transit", pct: 20, color: "#0EA5E9" },
+  { label: "Claimed", pct: 17, color: "#F59E0B" },
+  { label: "Expired", pct: 18, color: "#EF4444" },
 ];
 
 function StatusDonut() {
-    let cumulative = 0;
-    const radius = 40;
-    const circumference = 2 * Math.PI * radius;
+  let cumulative = 0;
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            className="card p-7"
-        >
-            <h2 className="text-lg font-bold text-primary-darker mb-6">Donation Status Breakdown</h2>
-            <div className="flex items-center gap-8 flex-wrap">
-                <svg viewBox="0 0 100 100" className="h-40 w-40 -rotate-90 flex-shrink-0">
-                    {STATUS_BREAKDOWN.map((s, i) => {
-                        const dash = (s.pct / 100) * circumference;
-                        const offset = circumference - (cumulative / 100) * circumference;
-                        cumulative += s.pct;
-                        return (
-                            <motion.circle
-                                key={s.label}
-                                cx="50"
-                                cy="50"
-                                r={radius}
-                                fill="none"
-                                stroke={s.color}
-                                strokeWidth="14"
-                                strokeDasharray={`${dash} ${circumference - dash}`}
-                                initial={{ strokeDashoffset: circumference }}
-                                animate={{ strokeDashoffset: offset }}
-                                transition={{ duration: 0.8, delay: 0.1 * i, ease: "easeOut" }}
-                            />
-                        );
-                    })}
-                </svg>
-                <div className="space-y-2.5">
-                    {STATUS_BREAKDOWN.map((s) => (
-                        <div key={s.label} className="flex items-center gap-2 text-sm">
-                            <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
-                            <span className="text-ink font-medium">
-                                {s.label} — {s.pct}%
-                            </span>
-                        </div>
-                    ))}
-                </div>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.3 }}
+      className="card p-7"
+    >
+      <h2 className="text-lg font-bold text-primary-darker mb-6">Donation Status Breakdown</h2>
+      <div className="flex items-center gap-8 flex-wrap">
+        <svg viewBox="0 0 100 100" className="h-40 w-40 -rotate-90 flex-shrink-0">
+          {STATUS_BREAKDOWN.map((s, i) => {
+            const dash = (s.pct / 100) * circumference;
+            const offset = circumference - (cumulative / 100) * circumference;
+            cumulative += s.pct;
+            return (
+              <motion.circle
+                key={s.label}
+                cx="50"
+                cy="50"
+                r={radius}
+                fill="none"
+                stroke={s.color}
+                strokeWidth="14"
+                strokeDasharray={`${dash} ${circumference - dash}`}
+                initial={{ strokeDashoffset: circumference }}
+                animate={{ strokeDashoffset: offset }}
+                transition={{ duration: 0.8, delay: 0.1 * i, ease: "easeOut" }}
+              />
+            );
+          })}
+        </svg>
+        <div className="space-y-2.5">
+          {STATUS_BREAKDOWN.map((s) => (
+            <div key={s.label} className="flex items-center gap-2 text-sm">
+              <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
+              <span className="text-ink font-medium">
+                {s.label} — {s.pct}%
+              </span>
             </div>
-        </motion.div>
-    );
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
 }
 
 

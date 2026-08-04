@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   ArrowRight,
 } from "lucide-react";
-
+import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, href: "#admin-dashboard" },
@@ -29,15 +29,15 @@ const NAV_ITEMS = [
 ];
 
 function Sidebar({ open, onClose }) {
+  const handleLogout = useLogout();
   return (
     <>
       {open && (
         <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={onClose} aria-hidden="true" />
       )}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         <div className="flex items-center justify-between px-6 h-20 border-b border-gray-100">
           <a href="#home" className="flex items-center gap-2.5" aria-label="FoodShare home">
@@ -61,11 +61,10 @@ function Sidebar({ open, onClose }) {
             <a
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                item.active
-                  ? "bg-accent text-primary-dark"
-                  : "text-muted hover:bg-gray-50 hover:text-ink"
-              }`}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
+                ? "bg-accent text-primary-dark"
+                : "text-muted hover:bg-gray-50 hover:text-ink"
+                }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
               {item.label}
@@ -80,10 +79,7 @@ function Sidebar({ open, onClose }) {
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
           <button
-            onClick={() => {
-              sessionStorage.removeItem("foodshare_isAdmin");
-              window.location.hash = "#login";
-            }}
+            onClick={handleLogout}
             className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
           >
             <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
@@ -159,11 +155,10 @@ function ManageDonations() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${
-              filter === f
-                ? "bg-primary text-white border-primary"
-                : "bg-white text-muted border-gray-200 hover:border-primary/40"
-            }`}
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${filter === f
+              ? "bg-primary text-white border-primary"
+              : "bg-white text-muted border-gray-200 hover:border-primary/40"
+              }`}
           >
             {f}
           </button>

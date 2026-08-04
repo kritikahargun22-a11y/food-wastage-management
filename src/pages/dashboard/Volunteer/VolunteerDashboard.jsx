@@ -21,7 +21,7 @@ import {
   QrCode,
   PenLine,
 } from "lucide-react";
-
+import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, active: true, href: "#volunteer-dashboard" },
@@ -29,20 +29,20 @@ const NAV_ITEMS = [
   { label: "Navigation", icon: NavigationIcon, href: "#navigation" },
   { label: "Delivery History", icon: CheckCircle2, href: "#delivery-history" },
   { label: "Notifications", icon: BellIcon, href: "#volunteer-notifications" },
-  
+
   { label: "Settings", icon: SettingsIcon, href: "#" },
 ];
 
 function Sidebar({ open, onClose, available, onToggleAvailable }) {
+  const handleLogout = useLogout();
   return (
     <>
       {open && (
         <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={onClose} aria-hidden="true" />
       )}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         <div className="flex items-center justify-between px-6 h-20 border-b border-gray-100">
           <a href="#home" className="flex items-center gap-2.5" aria-label="FoodShare home">
@@ -61,11 +61,10 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
             <a
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                item.active
-                  ? "bg-accent text-primary-dark"
-                  : "text-muted hover:bg-gray-50 hover:text-ink"
-              }`}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
+                ? "bg-accent text-primary-dark"
+                : "text-muted hover:bg-gray-50 hover:text-ink"
+                }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
               {item.label}
@@ -80,9 +79,8 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
             className="flex items-center gap-2 w-full"
           >
             <span
-              className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${
-                available ? "bg-emerald-500" : "bg-gray-300"
-              }`}
+              className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${available ? "bg-emerald-500" : "bg-gray-300"
+                }`}
             />
             <span className="text-xs font-bold text-primary-darker">
               {available ? "Available for pickups" : "Offline"}
@@ -91,13 +89,13 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
         </div>
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
-          <a
-            href="#logout"
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
           >
             <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
             Log Out
-          </a>
+          </button>
         </div>
       </aside>
     </>
@@ -178,11 +176,10 @@ function CurrentPickupBanner({ pickedUp, onMarkPickedUp }) {
           <button
             onClick={onMarkPickedUp}
             disabled={pickedUp}
-            className={`flex items-center gap-2 rounded-xl text-sm font-semibold px-4 py-2.5 transition ${
-              pickedUp
-                ? "bg-white/20 text-white cursor-default"
-                : "bg-white text-primary-dark hover:bg-gray-50"
-            }`}
+            className={`flex items-center gap-2 rounded-xl text-sm font-semibold px-4 py-2.5 transition ${pickedUp
+              ? "bg-white/20 text-white cursor-default"
+              : "bg-white text-primary-dark hover:bg-gray-50"
+              }`}
           >
             {pickedUp ? "Picked Up ✓" : "Mark Picked Up"}
             {!pickedUp && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
@@ -268,18 +265,16 @@ function DeliveryChecklist() {
             className="flex items-center gap-3 w-full text-left"
           >
             <span
-              className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-xs font-bold transition ${
-                checked[item.key]
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-muted"
-              }`}
+              className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-xs font-bold transition ${checked[item.key]
+                ? "bg-primary text-white"
+                : "bg-gray-100 text-muted"
+                }`}
             >
               {checked[item.key] ? "✓" : i + 1}
             </span>
             <span
-              className={`text-sm font-medium ${
-                checked[item.key] ? "text-ink" : "text-muted"
-              }`}
+              className={`text-sm font-medium ${checked[item.key] ? "text-ink" : "text-muted"
+                }`}
             >
               {item.label}
             </span>

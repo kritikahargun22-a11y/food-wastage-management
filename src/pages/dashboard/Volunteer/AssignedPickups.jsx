@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -6,7 +6,6 @@ import {
   Navigation as NavigationIcon,
   History,
   Bell as BellIcon,
-  Settings as SettingsIcon,
   User,
   LogOut,
   Leaf,
@@ -17,29 +16,33 @@ import {
   Clock,
   Package,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
-
+import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { db } from "../../../firebase.js";
+import { useAuth } from "../../../context/AuthContext.jsx";
+import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "#volunteer-dashboard" },
+  { label: "Overview", icon: LayoutDashboard, href: "#volunteer-dashboard" },
   { label: "Assigned Pickups", icon: Bike, active: true, href: "#assigned-pickups" },
-  { label: "Navigation", icon: NavigationIcon, href: "#navigation" },
-  { label: "Delivery History", icon: History, href: "#delivery-history" },
+  { label: "Navigation", icon: NavigationIcon, href: "#volunteer-navigation" },
+  { label: "Delivery History", icon: History, href: "#volunteer-history" },
   { label: "Notifications", icon: BellIcon, href: "#volunteer-notifications" },
-  
-  { label: "Settings", icon: SettingsIcon, href: "#" },
+  { label: "Profile", icon: User, href: "#profile" },
+  { label: "Settings", icon: LayoutDashboard, href: "#volunteer-settings" },
 ];
 
 function Sidebar({ open, onClose, available, onToggleAvailable }) {
+  const handleLogout = useLogout();
   return (
     <>
       {open && (
         <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={onClose} aria-hidden="true" />
       )}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         <div className="flex items-center justify-between px-6 h-20 border-b border-gray-100">
           <a href="#home" className="flex items-center gap-2.5" aria-label="FoodShare home">
@@ -58,11 +61,10 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
             <a
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                item.active
-                  ? "bg-accent text-primary-dark"
-                  : "text-muted hover:bg-gray-50 hover:text-ink"
-              }`}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
+                ? "bg-accent text-primary-dark"
+                : "text-muted hover:bg-gray-50 hover:text-ink"
+                }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
               {item.label}
@@ -73,9 +75,8 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
         <div className="mx-4 mb-4 rounded-xl bg-accent/60 border border-emerald-100 px-4 py-3.5">
           <button onClick={onToggleAvailable} className="flex items-center gap-2 w-full">
             <span
-              className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${
-                available ? "bg-emerald-500" : "bg-gray-300"
-              }`}
+              className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${available ? "bg-emerald-500" : "bg-gray-300"
+                }`}
             />
             <span className="text-xs font-bold text-primary-darker">
               {available ? "Available for pickups" : "Offline"}
@@ -84,13 +85,13 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
         </div>
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
-          <a
-            href="#logout"
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
           >
             <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
             Log Out
-          </a>
+          </button>
         </div>
       </aside>
     </>
@@ -112,75 +113,27 @@ function DashboardHeader({ onMenuClick }) {
           <BellIcon className="h-5 w-5 text-ink" />
           <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
         </button>
-        <span className="h-9 w-9 rounded-full bg-gradient-to-br from-sky-200 to-sky-500 flex items-center justify-center text-xs font-bold text-white">
-          AD
-        </span>
       </div>
     </header>
   );
 }
 
-/* ---------------- Pickups Data ---------------- */
+/* ---------------- Pickup Card ---------------- */
 const STATUS_STYLES = {
-  "Picking Up": { bg: "bg-amber-100", text: "text-amber-700" },
-  Assigned: { bg: "bg-sky-100", text: "text-sky-700" },
-  Completed: { bg: "bg-emerald-100", text: "text-emerald-700" },
+  "In Transit": { bg: "bg-sky-100", text: "text-sky-700" },
+  Delivered: { bg: "bg-emerald-100", text: "text-emerald-700" },
 };
 
-const FILTERS = ["All", "Assigned", "Picking Up", "Completed"];
+const FOOD_EMOJI = {
+  "Vegetables & Fruits": "🥗",
+  "Cooked Meals": "🍛",
+  "Bakery Items": "🍞",
+  "Packaged Food": "📦",
+};
 
-const INITIAL_PICKUPS = [
-  {
-    id: "1",
-    emoji: "🥗",
-    title: "Fresh Vegetable Crate",
-    donor: "Green Bowl Cafe",
-    ngo: "Hope Kitchen Trust",
-    distance: "1.2 km",
-    eta: "8 min",
-    status: "Picking Up",
-  },
-  {
-    id: "2",
-    emoji: "🍞",
-    title: "Bakery Surplus Box",
-    donor: "Sunrise Bakery",
-    ngo: "Seva Foundation",
-    distance: "3.4 km",
-    eta: "15 min",
-    status: "Assigned",
-  },
-  {
-    id: "3",
-    emoji: "🍛",
-    title: "Cooked Meal Trays",
-    donor: "Taj Banquet Hall",
-    ngo: "Anna Daan NGO",
-    distance: "4.8 km",
-    eta: "20 min",
-    status: "Assigned",
-  },
-  {
-    id: "4",
-    emoji: "🥛",
-    title: "Dairy Surplus Pack",
-    donor: "Green Valley Farms",
-    ngo: "Hope Kitchen Trust",
-    distance: "2.1 km",
-    eta: "—",
-    status: "Completed",
-  },
-];
-
-/* ---------------- Pickup Card ---------------- */
-function PickupCard({ pickup, onAdvance }) {
-  const s = STATUS_STYLES[pickup.status];
-  const nextAction =
-    pickup.status === "Assigned"
-      ? "Start Pickup"
-      : pickup.status === "Picking Up"
-      ? "Mark Picked Up"
-      : null;
+function PickupCard({ pickup, onMarkDelivered, updating }) {
+  const s = STATUS_STYLES[pickup.status] || STATUS_STYLES["In Transit"];
+  const emoji = FOOD_EMOJI[pickup.type] || "🍽️";
 
   return (
     <motion.div
@@ -193,20 +146,21 @@ function PickupCard({ pickup, onAdvance }) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-start gap-3 min-w-0">
           <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-2xl flex-shrink-0">
-            {pickup.emoji}
+            {emoji}
           </span>
           <div className="min-w-0">
             <p className="text-sm font-bold text-ink mb-1">{pickup.title}</p>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
               <span className="flex items-center gap-1">
-                <Package className="h-3.5 w-3.5" aria-hidden="true" /> {pickup.donor} → {pickup.ngo}
+                <Package className="h-3.5 w-3.5" aria-hidden="true" />
+                {pickup.donorName} → {pickup.ngoName}
               </span>
               <span className="flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" aria-hidden="true" /> {pickup.distance}
+                <MapPin className="h-3.5 w-3.5" aria-hidden="true" /> {pickup.address}
               </span>
-              {pickup.eta !== "—" && (
+              {pickup.window && (
                 <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" aria-hidden="true" /> ETA {pickup.eta}
+                  <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {pickup.window}
                 </span>
               )}
             </div>
@@ -218,21 +172,29 @@ function PickupCard({ pickup, onAdvance }) {
         </span>
       </div>
 
-      {pickup.status !== "Completed" && (
+      {pickup.status === "In Transit" && (
         <div className="flex gap-2 mt-4">
           <button className="flex items-center gap-2 rounded-xl border border-gray-200 text-ink text-xs font-semibold px-4 py-2.5 hover:bg-gray-50 transition">
             <Phone className="h-3.5 w-3.5" aria-hidden="true" />
             Call Donor
           </button>
-          {nextAction && (
-            <button
-              onClick={() => onAdvance(pickup.id)}
-              className="flex items-center gap-2 rounded-xl bg-green-gradient text-white text-xs font-semibold px-4 py-2.5 hover:opacity-90 transition"
-            >
-              {nextAction}
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-            </button>
-          )}
+          <button
+            onClick={() => onMarkDelivered(pickup.id)}
+            disabled={updating === pickup.id}
+            className="flex items-center gap-2 rounded-xl bg-green-gradient text-white text-xs font-semibold px-4 py-2.5 hover:opacity-90 transition disabled:opacity-60"
+          >
+            {updating === pickup.id ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                Updating...
+              </>
+            ) : (
+              <>
+                Mark Delivered
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </>
+            )}
+          </button>
         </div>
       )}
     </motion.div>
@@ -240,22 +202,56 @@ function PickupCard({ pickup, onAdvance }) {
 }
 
 /* ---------------- Pickups List ---------------- */
-function PickupsList() {
-  const [pickups, setPickups] = useState(INITIAL_PICKUPS);
-  const [filter, setFilter] = useState("All");
+const FILTERS = ["All", "In Transit", "Delivered"];
 
-  function advance(id) {
-    setPickups((list) =>
-      list.map((p) => {
-        if (p.id !== id) return p;
-        if (p.status === "Assigned") return { ...p, status: "Picking Up" };
-        if (p.status === "Picking Up") return { ...p, status: "Completed" };
-        return p;
-      })
+function PickupsList() {
+  const { user } = useAuth();
+  const [pickups, setPickups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("All");
+  const [updating, setUpdating] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const q = query(collection(db, "donations"), where("volunteerId", "==", user.uid));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setPickups(items);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Failed to load pickups:", err);
+        setLoading(false);
+      }
     );
+
+    return unsubscribe;
+  }, [user]);
+
+  async function markDelivered(id) {
+    setUpdating(id);
+    try {
+      await updateDoc(doc(db, "donations", id), { status: "Delivered" });
+    } catch (err) {
+      console.error("Failed to mark delivered:", err);
+    } finally {
+      setUpdating(null);
+    }
   }
 
   const filtered = pickups.filter((p) => filter === "All" || p.status === filter);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 text-primary animate-spin" aria-hidden="true" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -264,11 +260,10 @@ function PickupsList() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${
-              filter === f
-                ? "bg-primary text-white border-primary"
-                : "bg-white text-muted border-gray-200 hover:border-primary/40"
-            }`}
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${filter === f
+              ? "bg-primary text-white border-primary"
+              : "bg-white text-muted border-gray-200 hover:border-primary/40"
+              }`}
           >
             {f}
           </button>
@@ -278,12 +273,12 @@ function PickupsList() {
       <div className="space-y-4">
         <AnimatePresence>
           {filtered.map((pickup) => (
-            <PickupCard key={pickup.id} pickup={pickup} onAdvance={advance} />
+            <PickupCard key={pickup.id} pickup={pickup} onMarkDelivered={markDelivered} updating={updating} />
           ))}
         </AnimatePresence>
 
         {filtered.length === 0 && (
-          <p className="text-sm text-muted text-center py-16">No pickups in this category.</p>
+          <p className="text-sm text-muted text-center py-16">No pickups assigned to you yet.</p>
         )}
       </div>
     </div>

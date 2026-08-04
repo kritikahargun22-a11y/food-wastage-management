@@ -18,7 +18,7 @@ import {
     Recycle,
     AlertTriangle,
 } from "lucide-react";
-
+import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
     { label: "Overview", icon: LayoutDashboard, href: "#dashboard" },
@@ -30,6 +30,8 @@ const NAV_ITEMS = [
 ];
 
 function Sidebar({ open, onClose }) {
+    const handleLogout = useLogout();
+
     return (
         <>
             {open && (
@@ -57,8 +59,8 @@ function Sidebar({ open, onClose }) {
                             key={item.label}
                             href={item.href}
                             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
-                                    ? "bg-accent text-primary-dark"
-                                    : "text-muted hover:bg-gray-50 hover:text-ink"
+                                ? "bg-accent text-primary-dark"
+                                : "text-muted hover:bg-gray-50 hover:text-ink"
                                 }`}
                         >
                             <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
@@ -76,13 +78,14 @@ function Sidebar({ open, onClose }) {
                 </div>
 
                 <div className="px-4 pb-6 border-t border-gray-100 pt-4">
-                    <a
-                        href="#logout"
-                        className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+
                     >
                         <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
                         Log Out
-                    </a>
+                    </button>
                 </div>
             </aside>
         </>
@@ -211,8 +214,8 @@ function AppPreferences() {
                             key={lang}
                             onClick={() => setLanguage(lang)}
                             className={`flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm font-semibold transition ${language === lang
-                                    ? "border-primary bg-accent text-primary-dark"
-                                    : "border-gray-200 text-muted hover:border-primary/40"
+                                ? "border-primary bg-accent text-primary-dark"
+                                : "border-gray-200 text-muted hover:border-primary/40"
                                 }`}
                         >
                             <Globe className="h-3.5 w-3.5" aria-hidden="true" />

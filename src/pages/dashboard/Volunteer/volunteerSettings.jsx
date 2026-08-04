@@ -20,7 +20,7 @@ import {
   Trash2,
   AlertTriangle,
 } from "lucide-react";
-
+import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, href: "#volunteer-dashboard" },
@@ -28,20 +28,20 @@ const NAV_ITEMS = [
   { label: "Navigation", icon: NavigationIcon, href: "#volunteer-navigation" },
   { label: "Delivery History", icon: History, href: "#volunteer-history" },
   { label: "Notifications", icon: BellIcon, href: "#volunteer-notifications" },
-  
+
   { label: "Settings", icon: SettingsIcon, active: true, href: "#volunteer-settings" },
 ];
 
 function Sidebar({ open, onClose, available, onToggleAvailable }) {
+  const handleLogout = useLogout();
   return (
     <>
       {open && (
         <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={onClose} aria-hidden="true" />
       )}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         <div className="flex items-center justify-between px-6 h-20 border-b border-gray-100">
           <a href="#home" className="flex items-center gap-2.5" aria-label="FoodShare home">
@@ -60,11 +60,10 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
             <a
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                item.active
-                  ? "bg-accent text-primary-dark"
-                  : "text-muted hover:bg-gray-50 hover:text-ink"
-              }`}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
+                ? "bg-accent text-primary-dark"
+                : "text-muted hover:bg-gray-50 hover:text-ink"
+                }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
               {item.label}
@@ -75,9 +74,8 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
         <div className="mx-4 mb-4 rounded-xl bg-accent/60 border border-emerald-100 px-4 py-3.5">
           <button onClick={onToggleAvailable} className="flex items-center gap-2 w-full">
             <span
-              className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${
-                available ? "bg-emerald-500" : "bg-gray-300"
-              }`}
+              className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${available ? "bg-emerald-500" : "bg-gray-300"
+                }`}
             />
             <span className="text-xs font-bold text-primary-darker">
               {available ? "Available for pickups" : "Offline"}
@@ -86,13 +84,13 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
         </div>
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
-          <a
-            href="#logout"
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
           >
             <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
             Log Out
-          </a>
+          </button>
         </div>
       </aside>
     </>
@@ -128,9 +126,8 @@ function ToggleRow({ label, desc, checked, onChange }) {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${
-          checked ? "bg-primary" : "bg-gray-200"
-        }`}
+        className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${checked ? "bg-primary" : "bg-gray-200"
+          }`}
       >
         <motion.span
           layout
@@ -292,11 +289,10 @@ function VehicleInfo() {
           <button
             key={o.id}
             onClick={() => setVehicle(o.id)}
-            className={`rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
-              vehicle === o.id
-                ? "border-primary bg-accent text-primary-dark"
-                : "border-gray-200 text-muted hover:border-primary/40"
-            }`}
+            className={`rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${vehicle === o.id
+              ? "border-primary bg-accent text-primary-dark"
+              : "border-gray-200 text-muted hover:border-primary/40"
+              }`}
           >
             {o.label}
           </button>
@@ -374,11 +370,10 @@ function RegionalPreferences() {
           <button
             key={lang}
             onClick={() => setLanguage(lang)}
-            className={`flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-              language === lang
-                ? "border-primary bg-accent text-primary-dark"
-                : "border-gray-200 text-muted hover:border-primary/40"
-            }`}
+            className={`flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm font-semibold transition ${language === lang
+              ? "border-primary bg-accent text-primary-dark"
+              : "border-gray-200 text-muted hover:border-primary/40"
+              }`}
           >
             <Globe className="h-3.5 w-3.5" aria-hidden="true" />
             {lang}

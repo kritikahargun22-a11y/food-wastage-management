@@ -15,7 +15,7 @@ import {
   Check,
   Truck,
 } from "lucide-react";
-
+import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, href: "#ngo-dashboard" },
@@ -27,6 +27,7 @@ const NAV_ITEMS = [
 ];
 
 function Sidebar({ open, onClose }) {
+  const handleLogout = useLogout();
   return (
     <>
       {open && (
@@ -37,9 +38,8 @@ function Sidebar({ open, onClose }) {
         />
       )}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         <div className="flex items-center justify-between px-6 h-20 border-b border-gray-100">
           <a href="#home" className="flex items-center gap-2.5" aria-label="FoodShare home">
@@ -58,11 +58,10 @@ function Sidebar({ open, onClose }) {
             <a
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                item.active
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
                   ? "bg-accent text-primary-dark"
                   : "text-muted hover:bg-gray-50 hover:text-ink"
-              }`}
+                }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
               {item.label}
@@ -76,13 +75,13 @@ function Sidebar({ open, onClose }) {
         </div>
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
-          <a
-            href="#logout"
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
-          >
-            <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
-            Log Out
-          </a>
+          <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+        >
+          <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
+          Log Out
+        </button>
         </div>
       </aside>
     </>
@@ -144,13 +143,12 @@ function CurrentDeliveryTracker() {
           <div key={step.label} className="flex gap-4">
             <div className="flex flex-col items-center">
               <span
-                className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                  step.state === "done"
+                className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold ${step.state === "done"
                     ? "bg-primary text-white"
                     : step.state === "active"
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-100 text-muted"
-                }`}
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-100 text-muted"
+                  }`}
               >
                 {step.state === "done" ? (
                   <Check className="h-3.5 w-3.5" aria-hidden="true" />
@@ -162,17 +160,15 @@ function CurrentDeliveryTracker() {
               </span>
               {i < TIMELINE_STEPS.length - 1 && (
                 <span
-                  className={`w-px flex-1 min-h-[36px] ${
-                    step.state === "done" ? "bg-primary" : "bg-gray-200"
-                  }`}
+                  className={`w-px flex-1 min-h-[36px] ${step.state === "done" ? "bg-primary" : "bg-gray-200"
+                    }`}
                 />
               )}
             </div>
             <div className="pb-7">
               <p
-                className={`text-sm font-bold ${
-                  step.state === "pending" ? "text-muted" : "text-ink"
-                }`}
+                className={`text-sm font-bold ${step.state === "pending" ? "text-muted" : "text-ink"
+                  }`}
               >
                 {step.label}
               </p>
@@ -224,11 +220,10 @@ function DonationHistoryTable() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${
-              filter === f
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${filter === f
                 ? "bg-primary text-white border-primary"
                 : "bg-white text-muted border-gray-200 hover:border-primary/40"
-            }`}
+              }`}
           >
             {f}
           </button>
