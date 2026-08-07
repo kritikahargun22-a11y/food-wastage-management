@@ -25,7 +25,7 @@ export default function Login() {
 
     try {
       const { profile } = await login(form.email, form.password);
-
+      console.log("Logged in user profile:", profile);
 
       if (!profile) {
         setError("Account found but no profile data — please contact support.");

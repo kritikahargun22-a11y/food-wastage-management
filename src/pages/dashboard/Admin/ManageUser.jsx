@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -14,12 +14,16 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
+import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { db } from "../../../firebase.js";
 import { useLogout } from "../../../hooks/useLogout.js";
+
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Overview", icon: LayoutDashboard, href: "#admin-dashboard" },
-  { label: "Manage Users", icon: Users, active: true, href: "#manage-users" },
+  { label: "Dashboard", icon: LayoutDashboard, href: "#admin-dashboard" },
+  { label: "Manage Users", icon: Users, active: true, href: "#manage-user" },
   { label: "Manage Donations", icon: Truck, href: "#manage-donations" },
   { label: "Approve NGOs", icon: Building2, href: "#approve-ngos" },
   { label: "Analytics", icon: BarChart3, href: "#analytics" },
@@ -29,6 +33,7 @@ const NAV_ITEMS = [
 
 function Sidebar({ open, onClose }) {
   const handleLogout = useLogout();
+
   return (
     <>
       {open && (
@@ -61,8 +66,8 @@ function Sidebar({ open, onClose }) {
               key={item.label}
               href={item.href}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
-                ? "bg-accent text-primary-dark"
-                : "text-muted hover:bg-gray-50 hover:text-ink"
+                  ? "bg-accent text-primary-dark"
+                  : "text-muted hover:bg-gray-50 hover:text-ink"
                 }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
@@ -73,17 +78,17 @@ function Sidebar({ open, onClose }) {
 
         <div className="mx-4 mb-4 rounded-xl bg-primary-darker px-4 py-3.5">
           <p className="text-sm font-bold text-white">Super Admin</p>
-          <p className="text-xs text-white/60">admin@foodshare.app</p>
+          <p className="text-xs text-white/60">admin@foodshare.com</p>
         </div>
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
           <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
-        >
-          <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
-          Log Out
-        </button>
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+          >
+            <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
+            Log Out
+          </button>
         </div>
       </aside>
     </>
@@ -98,61 +103,62 @@ function DashboardHeader({ onMenuClick }) {
         <button onClick={onMenuClick} className="lg:hidden text-ink" aria-label="Open menu">
           <Menu className="h-6 w-6" />
         </button>
-        <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">Platform Overview</h1>
+        <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">Manage Users</h1>
       </div>
-      <div className="flex items-center gap-4">
-        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent" aria-label="Notifications">
-          <Bell className="h-5 w-5 text-ink" />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
-        </button>
-        <span className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-200 to-violet-500 flex items-center justify-center text-xs font-bold text-white">
-          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-        </span>
-      </div>
+      <button className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent" aria-label="Notifications">
+        <Bell className="h-5 w-5 text-ink" />
+        <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
+      </button>
     </header>
   );
 }
 
-/* ---------------- Users Data ---------------- */
+/* ---------------- Users Table ---------------- */
 const ROLE_STYLES = {
-  Donor: "bg-emerald-100 text-emerald-700",
-  NGO: "bg-sky-100 text-sky-700",
-  Volunteer: "bg-amber-100 text-amber-700",
+  donor: "bg-emerald-100 text-emerald-700",
+  ngo: "bg-sky-100 text-sky-700",
+  volunteer: "bg-amber-100 text-amber-700",
+  admin: "bg-violet-100 text-violet-700",
 };
 
-const ALL_USERS = [
-  { name: "Aarav Mehta", role: "Donor", email: "aarav@mail.com", joined: "Jun 12", status: "Active" },
-  { name: "Hope Kitchen Trust", role: "NGO", email: "contact@hopekitchen.org", joined: "May 28", status: "Active" },
-  { name: "Priya Sharma", role: "Volunteer", email: "priya@mail.com", joined: "Jun 30", status: "Active" },
-  { name: "Rohan Kapoor", role: "Volunteer", email: "rohan@mail.com", joined: "Apr 09", status: "Blocked" },
-  { name: "Daily Bread Co.", role: "Donor", email: "hello@dailybread.com", joined: "Mar 22", status: "Active" },
-];
+const FILTERS = ["All", "donor", "ngo", "volunteer"];
+const FILTER_LABELS = { All: "All", donor: "Donors", ngo: "NGOs", volunteer: "Volunteers" };
 
-const FILTERS = ["All", "Donors", "NGOs", "Volunteers", "Blocked"];
-
-function matchesFilter(user, filter) {
-  if (filter === "All") return true;
-  if (filter === "Blocked") return user.status === "Blocked";
-  if (filter === "Donors") return user.role === "Donor";
-  if (filter === "NGOs") return user.role === "NGO";
-  if (filter === "Volunteers") return user.role === "Volunteer";
-  return true;
-}
-
-/* ---------------- Manage Users Table ---------------- */
 function ManageUsers() {
-  const [users, setUsers] = useState(ALL_USERS);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
+  const [updating, setUpdating] = useState(null);
 
-  function toggleStatus(name) {
-    setUsers((list) =>
-      list.map((u) =>
-        u.name === name ? { ...u, status: u.status === "Active" ? "Blocked" : "Active" } : u
-      )
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "users"),
+      (snapshot) => {
+        const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setUsers(items);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Failed to load users:", err);
+        setLoading(false);
+      }
     );
+    return unsubscribe;
+  }, []);
+
+  async function toggleBlock(userId, currentlyBlocked) {
+    setUpdating(userId);
+    try {
+      await updateDoc(doc(db, "users", userId), { blocked: !currentlyBlocked });
+    } catch (err) {
+      console.error("Failed to update user status:", err);
+    } finally {
+      setUpdating(null);
+    }
   }
 
-  const filtered = users.filter((u) => matchesFilter(u, filter));
+  const filtered = users.filter((u) => filter === "All" || u.role === filter);
 
   return (
     <motion.div
@@ -163,6 +169,7 @@ function ManageUsers() {
     >
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <h2 className="text-lg font-bold text-primary-darker">All Users</h2>
+        <span className="text-xs font-semibold text-muted">{users.length} total</span>
       </div>
 
       <div className="flex gap-2 flex-wrap mb-6">
@@ -171,86 +178,87 @@ function ManageUsers() {
             key={f}
             onClick={() => setFilter(f)}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${filter === f
-              ? "bg-primary text-white border-primary"
-              : "bg-white text-muted border-gray-200 hover:border-primary/40"
+                ? "bg-primary text-white border-primary"
+                : "bg-white text-muted border-gray-200 hover:border-primary/40"
               }`}
           >
-            {f}
+            {FILTER_LABELS[f]}
           </button>
         ))}
       </div>
 
-      <div className="overflow-x-auto -mx-2">
-        <table className="w-full text-sm min-w-[720px]">
-          <thead>
-            <tr className="text-left text-xs font-bold uppercase tracking-wide text-muted">
-              <th className="px-2 pb-3">Name</th>
-              <th className="px-2 pb-3">Role</th>
-              <th className="px-2 pb-3">Email</th>
-              <th className="px-2 pb-3">Joined</th>
-              <th className="px-2 pb-3">Status</th>
-              <th className="px-2 pb-3 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <AnimatePresence>
-              {filtered.map((u) => (
-                <motion.tr
-                  key={u.name}
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="border-t border-gray-100"
-                >
-                  <td className="px-2 py-3.5 font-semibold text-ink">
-                    <a href="#" className="hover:text-primary transition">
-                      {u.name}
-                    </a>
-                  </td>
-                  <td className="px-2 py-3.5">
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${ROLE_STYLES[u.role]}`}>
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="px-2 py-3.5 text-ink/70 font-mono text-xs">{u.email}</td>
-                  <td className="px-2 py-3.5 text-ink/60 font-mono text-xs">{u.joined}</td>
-                  <td className="px-2 py-3.5">
-                    <span
-                      className={`inline-flex items-center gap-1.5 text-xs font-semibold ${u.status === "Active" ? "text-emerald-600" : "text-red-500"
-                        }`}
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-6 w-6 text-primary animate-spin" aria-hidden="true" />
+        </div>
+      ) : (
+        <div className="overflow-x-auto -mx-2">
+          <table className="w-full text-sm min-w-[720px]">
+            <thead>
+              <tr className="text-left text-xs font-bold uppercase tracking-wide text-muted">
+                <th className="px-2 pb-3">Name</th>
+                <th className="px-2 pb-3">Role</th>
+                <th className="px-2 pb-3">Email</th>
+                <th className="px-2 pb-3">Status</th>
+                <th className="px-2 pb-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <AnimatePresence>
+                {filtered.map((u) => {
+                  const isBlocked = u.blocked === true;
+                  return (
+                    <motion.tr
+                      key={u.id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="border-t border-gray-100"
                     >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${u.status === "Active" ? "bg-emerald-500" : "bg-red-500"
-                          }`}
-                      />
-                      {u.status}
-                    </span>
-                  </td>
-                  <td className="px-2 py-3.5 text-right">
-                    <button
-                      onClick={() => toggleStatus(u.name)}
-                      className="text-xs font-semibold text-muted hover:text-ink"
-                    >
-                      {u.status === "Active" ? "Block" : "Unblock"}
-                    </button>
-                  </td>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </tbody>
-        </table>
+                      <td className="px-2 py-3.5 font-semibold text-ink">{u.name || "—"}</td>
+                      <td className="px-2 py-3.5">
+                        <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${ROLE_STYLES[u.role] || "bg-gray-100 text-gray-600"}`}>
+                          {u.role || "unknown"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-3.5 text-ink/70 font-mono text-xs">{u.email}</td>
+                      <td className="px-2 py-3.5">
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-xs font-semibold ${isBlocked ? "text-red-500" : "text-emerald-600"
+                            }`}
+                        >
+                          <span className={`h-1.5 w-1.5 rounded-full ${isBlocked ? "bg-red-500" : "bg-emerald-500"}`} />
+                          {isBlocked ? "Blocked" : "Active"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-3.5 text-right">
+                        <button
+                          onClick={() => toggleBlock(u.id, isBlocked)}
+                          disabled={updating === u.id}
+                          className="text-xs font-semibold text-muted hover:text-ink disabled:opacity-50"
+                        >
+                          {updating === u.id ? "..." : isBlocked ? "Unblock" : "Block"}
+                        </button>
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </AnimatePresence>
+            </tbody>
+          </table>
 
-        {filtered.length === 0 && (
-          <p className="text-sm text-muted text-center py-10">No users match this filter.</p>
-        )}
-      </div>
+          {filtered.length === 0 && (
+            <p className="text-sm text-muted text-center py-10">No users match this filter.</p>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }
 
 /* ---------------- Main Page ---------------- */
-export default function ManageUsersPage() {
+export default function ManageUser() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -14,13 +14,16 @@ import {
   Menu,
   X,
   ShieldCheck,
-  ArrowRight,
+  Loader2,
 } from "lucide-react";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../../../firebase.js";
 import { useLogout } from "../../../hooks/useLogout.js";
+
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Overview", icon: LayoutDashboard, href: "#admin-dashboard" },
-  { label: "Manage Users", icon: Users, href: "#manage-users" },
+  { label: "Dashboard", icon: LayoutDashboard, href: "#admin-dashboard" },
+  { label: "Manage Users", icon: Users, href: "#manage-user" },
   { label: "Manage Donations", icon: Truck, active: true, href: "#manage-donations" },
   { label: "Approve NGOs", icon: Building2, href: "#approve-ngos" },
   { label: "Analytics", icon: BarChart3, href: "#analytics" },
@@ -30,6 +33,7 @@ const NAV_ITEMS = [
 
 function Sidebar({ open, onClose }) {
   const handleLogout = useLogout();
+
   return (
     <>
       {open && (
@@ -62,8 +66,8 @@ function Sidebar({ open, onClose }) {
               key={item.label}
               href={item.href}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
-                ? "bg-accent text-primary-dark"
-                : "text-muted hover:bg-gray-50 hover:text-ink"
+                  ? "bg-accent text-primary-dark"
+                  : "text-muted hover:bg-gray-50 hover:text-ink"
                 }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
@@ -74,7 +78,7 @@ function Sidebar({ open, onClose }) {
 
         <div className="mx-4 mb-4 rounded-xl bg-primary-darker px-4 py-3.5">
           <p className="text-sm font-bold text-white">Super Admin</p>
-          <p className="text-xs text-white/60">admin@foodshare.app</p>
+          <p className="text-xs text-white/60">admin@foodshare.com</p>
         </div>
 
         <div className="px-4 pb-6 border-t border-gray-100 pt-4">
@@ -99,45 +103,49 @@ function DashboardHeader({ onMenuClick }) {
         <button onClick={onMenuClick} className="lg:hidden text-ink" aria-label="Open menu">
           <Menu className="h-6 w-6" />
         </button>
-        <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">Platform Overview</h1>
+        <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">Manage Donations</h1>
       </div>
-      <div className="flex items-center gap-4">
-        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent" aria-label="Notifications">
-          <Bell className="h-5 w-5 text-ink" />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
-        </button>
-        <span className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-200 to-violet-500 flex items-center justify-center text-xs font-bold text-white">
-          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-        </span>
-      </div>
+      <button className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent" aria-label="Notifications">
+        <Bell className="h-5 w-5 text-ink" />
+        <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
+      </button>
     </header>
   );
 }
 
-/* ---------------- Donations Data ---------------- */
+/* ---------------- Donations Table ---------------- */
 const STATUS_STYLES = {
   Available: "bg-emerald-100 text-emerald-700",
   Claimed: "bg-amber-100 text-amber-700",
   "In Transit": "bg-sky-100 text-sky-700",
   Delivered: "bg-gray-100 text-gray-600",
-  Expired: "bg-red-100 text-red-600",
 };
 
-const ALL_DONATIONS = [
-  { id: "FS-88213", food: "Fresh Vegetable Crate", donor: "Aarav Mehta", ngo: "Hope Kitchen Trust", volunteer: "Priya Sharma", status: "In Transit", date: "Jul 05" },
-  { id: "FS-88209", food: "Bakery Surplus Box", donor: "Daily Bread Co.", ngo: "—", volunteer: "—", status: "Available", date: "Jul 05" },
-  { id: "FS-88198", food: "Cooked Meal Trays", donor: "Sunrise Banquets", ngo: "Seva Foundation", volunteer: "Rohan Kapoor", status: "Claimed", date: "Jul 04" },
-  { id: "FS-88175", food: "Mixed Fruits", donor: "Fresh Mart", ngo: "Anna Daan NGO", volunteer: "Priya Sharma", status: "Delivered", date: "Jul 02" },
-  { id: "FS-88160", food: "Dairy Products", donor: "Green Valley Farms", ngo: "—", volunteer: "—", status: "Expired", date: "Jun 30" },
-];
+const FILTERS = ["All", "Available", "Claimed", "In Transit", "Delivered"];
 
-const FILTERS = ["All", "Available", "Claimed", "In Transit", "Delivered", "Expired"];
-
-/* ---------------- Manage Donations Table ---------------- */
-function ManageDonations() {
+function ManageDonationsTable() {
+  const [donations, setDonations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
 
-  const filtered = ALL_DONATIONS.filter((d) => filter === "All" || d.status === filter);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "donations"),
+      (snapshot) => {
+        const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setDonations(items);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Failed to load donations:", err);
+        setLoading(false);
+      }
+    );
+    return unsubscribe;
+  }, []);
+
+  const filtered = donations.filter((d) => filter === "All" || d.status === filter);
 
   return (
     <motion.div
@@ -148,6 +156,7 @@ function ManageDonations() {
     >
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <h2 className="text-lg font-bold text-primary-darker">All Donations</h2>
+        <span className="text-xs font-semibold text-muted">{donations.length} total</span>
       </div>
 
       <div className="flex gap-2 flex-wrap mb-6">
@@ -156,8 +165,8 @@ function ManageDonations() {
             key={f}
             onClick={() => setFilter(f)}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${filter === f
-              ? "bg-primary text-white border-primary"
-              : "bg-white text-muted border-gray-200 hover:border-primary/40"
+                ? "bg-primary text-white border-primary"
+                : "bg-white text-muted border-gray-200 hover:border-primary/40"
               }`}
           >
             {f}
@@ -165,66 +174,59 @@ function ManageDonations() {
         ))}
       </div>
 
-      <div className="overflow-x-auto -mx-2">
-        <table className="w-full text-sm min-w-[760px]">
-          <thead>
-            <tr className="text-left text-xs font-bold uppercase tracking-wide text-muted">
-              <th className="px-2 pb-3">ID</th>
-              <th className="px-2 pb-3">Food</th>
-              <th className="px-2 pb-3">Donor</th>
-              <th className="px-2 pb-3">NGO</th>
-              <th className="px-2 pb-3">Volunteer</th>
-              <th className="px-2 pb-3">Status</th>
-              <th className="px-2 pb-3">Date</th>
-              <th className="px-2 pb-3 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <AnimatePresence>
-              {filtered.map((d) => (
-                <motion.tr
-                  key={d.id}
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="border-t border-gray-100"
-                >
-                  <td className="px-2 py-3.5 font-mono text-xs text-muted">{d.id}</td>
-                  <td className="px-2 py-3.5 font-semibold text-ink">{d.food}</td>
-                  <td className="px-2 py-3.5 text-ink/80">{d.donor}</td>
-                  <td className="px-2 py-3.5 text-ink/80">{d.ngo}</td>
-                  <td className="px-2 py-3.5 text-ink/80">{d.volunteer}</td>
-                  <td className="px-2 py-3.5">
-                    <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${STATUS_STYLES[d.status]}`}>
-                      {d.status}
-                    </span>
-                  </td>
-                  <td className="px-2 py-3.5 text-ink/60 font-mono text-xs">{d.date}</td>
-                  <td className="px-2 py-3.5 text-right">
-                    <a
-                      href="#"
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-dark"
-                    >
-                      View <ArrowRight className="h-3 w-3" aria-hidden="true" />
-                    </a>
-                  </td>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </tbody>
-        </table>
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-6 w-6 text-primary animate-spin" aria-hidden="true" />
+        </div>
+      ) : (
+        <div className="overflow-x-auto -mx-2">
+          <table className="w-full text-sm min-w-[760px]">
+            <thead>
+              <tr className="text-left text-xs font-bold uppercase tracking-wide text-muted">
+                <th className="px-2 pb-3">Food</th>
+                <th className="px-2 pb-3">Donor</th>
+                <th className="px-2 pb-3">NGO</th>
+                <th className="px-2 pb-3">Volunteer</th>
+                <th className="px-2 pb-3">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <AnimatePresence>
+                {filtered.map((d) => (
+                  <motion.tr
+                    key={d.id}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="border-t border-gray-100"
+                  >
+                    <td className="px-2 py-3.5 font-semibold text-ink">{d.title}</td>
+                    <td className="px-2 py-3.5 text-ink/80">{d.donorName || "—"}</td>
+                    <td className="px-2 py-3.5 text-ink/80">{d.ngoName || "—"}</td>
+                    <td className="px-2 py-3.5 text-ink/80">{d.volunteerName || "—"}</td>
+                    <td className="px-2 py-3.5">
+                      <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${STATUS_STYLES[d.status]}`}>
+                        {d.status}
+                      </span>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </tbody>
+          </table>
 
-        {filtered.length === 0 && (
-          <p className="text-sm text-muted text-center py-10">No donations match this filter.</p>
-        )}
-      </div>
+          {filtered.length === 0 && (
+            <p className="text-sm text-muted text-center py-10">No donations match this filter.</p>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }
 
 /* ---------------- Main Page ---------------- */
-export default function ManageDonationsPage() {
+export default function ManageDonations() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -235,7 +237,7 @@ export default function ManageDonationsPage() {
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
         <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto">
-          <ManageDonations />
+          <ManageDonationsTable />
         </main>
       </div>
     </div>
