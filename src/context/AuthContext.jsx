@@ -62,6 +62,8 @@ export function AuthProvider({ children }) {
    */
   async function login(email, password) {
     const cred = await signInWithEmailAndPassword(auth, email, password);
+    console.log("Actual Auth UID:", cred.user.uid);
+    console.log("UID lenght:", cred.user.uid.length);
     const userDoc = await getDoc(doc(db, "users", cred.user.uid));
     const userProfile = userDoc.exists() ? userDoc.data() : null;
     setProfile(userProfile);

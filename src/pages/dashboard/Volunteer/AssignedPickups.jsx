@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { sendNotification } from "../../../utils/notify.js";
 import {
   LayoutDashboard,
   Bike,
@@ -235,7 +236,26 @@ function PickupsList() {
   async function markDelivered(id) {
     setUpdating(id);
     try {
+      const pickup = pickups.find((p) => p.id === id);
       await updateDoc(doc(db, "donations", id), { status: "Delivered" });
+
+      // Notify donor and NGO
+      if (pickup?.donorId) {
+        await sendNotification({
+          userId: pickup.donorId,
+          title: "Donation delivered",
+          desc: `Your "${pickup.title}" was successfully delivered`,
+          type: "delivery",
+        });
+      }
+      if (pickup?.ngoId) {
+        await sendNotification({
+          userId: pickup.ngoId,
+          title: "Delivery confirmed",
+          desc: `"${pickup.title}" has been delivered`,
+          type: "delivery",
+        });
+      }
     } catch (err) {
       console.error("Failed to mark delivered:", err);
     } finally {

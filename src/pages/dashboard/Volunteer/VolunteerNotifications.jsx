@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -6,18 +6,22 @@ import {
   Navigation as NavigationIcon,
   History,
   Bell as BellIcon,
-  Settings as SettingsIcon,
   User,
   LogOut,
   Leaf,
   Menu,
   X,
+  Loader2,
   PackagePlus,
+  Truck,
   CheckCircle2,
-  Star,
   AlarmClock,
 } from "lucide-react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "../../../firebase.js";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useLogout } from "../../../hooks/useLogout.js";
+
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "#volunteer-dashboard" },
@@ -25,11 +29,13 @@ const NAV_ITEMS = [
   { label: "Navigation", icon: NavigationIcon, href: "#volunteer-navigation" },
   { label: "Delivery History", icon: History, href: "#volunteer-history" },
   { label: "Notifications", icon: BellIcon, active: true, href: "#volunteer-notifications" },
-  { label: "Settings", icon: SettingsIcon, href: "#volunteer-settings" },
+  { label: "Profile", icon: User, href: "#profile" },
+  { label: "Settings", icon: LayoutDashboard, href: "#volunteer-settings" },
 ];
 
 function Sidebar({ open, onClose, available, onToggleAvailable }) {
   const handleLogout = useLogout();
+
   return (
     <>
       {open && (
@@ -88,7 +94,7 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
             Log Out
           </button>
         </div>
-      </aside>
+      </aside >
     </>
   );
 }
@@ -103,57 +109,52 @@ function DashboardHeader({ onMenuClick }) {
         </button>
         <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">Notifications</h1>
       </div>
-      <div className="flex items-center gap-4">
-        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent" aria-label="Notifications">
-          <BellIcon className="h-5 w-5 text-ink" />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
-        </button>
-        <span className="h-9 w-9 rounded-full bg-gradient-to-br from-sky-200 to-sky-500 flex items-center justify-center text-xs font-bold text-white">
-          AD
-        </span>
-      </div>
     </header>
   );
 }
 
 /* ---------------- Notifications List ---------------- */
-const NOTIFICATIONS = [
-  {
-    id: "1",
-    icon: PackagePlus,
-    iconBg: "bg-sky-500",
-    title: "New pickup assigned",
-    desc: "Bakery Surplus Box at Sunrise Bakery · 3.4 km away",
-    time: "5 min ago",
-  },
-  {
-    id: "2",
-    icon: AlarmClock,
-    iconBg: "bg-orange-500",
-    title: "Pickup window closing soon",
-    desc: "Fresh Vegetable Crate must be collected within 30 minutes",
-    time: "20 min ago",
-  },
-  {
-    id: "3",
-    icon: CheckCircle2,
-    iconBg: "bg-primary",
-    title: "Delivery confirmed",
-    desc: "Cooked Meal Trays delivered to Anna Daan NGO",
-    time: "2h ago",
-  },
-  {
-    id: "4",
-    icon: Star,
-    iconBg: "bg-amber-500",
-    title: "New rating received",
-    desc: "Hope Kitchen Trust rated your delivery 5 stars",
-    time: "1d ago",
-  },
-];
+const ICON_MAP = {
+  donation: { icon: PackagePlus, bg: "bg-emerald-500" },
+  pickup: { icon: Truck, bg: "bg-sky-500" },
+  delivery: { icon: CheckCircle2, bg: "bg-primary" },
+  expiry: { icon: AlarmClock, bg: "bg-orange-500" },
+};
+
+function timeAgo(timestamp) {
+  if (!timestamp?.seconds) return "";
+  const diffMs = Date.now() - timestamp.seconds * 1000;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
 
 function NotificationsList() {
-  const [items] = useState(NOTIFICATIONS);
+  const { user } = useAuth();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    const q = query(collection(db, "notifications"), where("userId", "==", user.uid));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setItems(list);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Failed to load notifications:", err);
+        setLoading(false);
+      }
+    );
+    return unsubscribe;
+  }, [user]);
 
   return (
     <motion.div
@@ -164,31 +165,40 @@ function NotificationsList() {
     >
       <h2 className="text-lg font-bold text-primary-darker mb-6">Notifications</h2>
 
-      <div className="space-y-3">
-        {items.map((n, i) => (
-          <motion.div
-            key={n.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.08 }}
-            className="flex items-start gap-4 rounded-xl border border-gray-100 px-4 py-4 hover:bg-gray-50/60 transition"
-          >
-            <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${n.iconBg}`}>
-              <n.icon className="h-5 w-5 text-white" aria-hidden="true" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-ink">{n.title}</p>
-              <p className="text-xs text-muted mt-0.5">
-                {n.desc} · {n.time}
-              </p>
-            </div>
-          </motion.div>
-        ))}
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-6 w-6 text-primary animate-spin" aria-hidden="true" />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {items.map((n, i) => {
+            const meta = ICON_MAP[n.type] || ICON_MAP.donation;
+            return (
+              <motion.div
+                key={n.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.05 }}
+                className="flex items-start gap-4 rounded-xl border border-gray-100 px-4 py-4 hover:bg-gray-50/60 transition"
+              >
+                <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${meta.bg}`}>
+                  <meta.icon className="h-5 w-5 text-white" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-ink">{n.title}</p>
+                  <p className="text-xs text-muted mt-0.5">
+                    {n.desc} · {timeAgo(n.createdAt)}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
 
-        {items.length === 0 && (
-          <p className="text-sm text-muted text-center py-10">No notifications yet.</p>
-        )}
-      </div>
+          {items.length === 0 && (
+            <p className="text-sm text-muted text-center py-10">No notifications yet.</p>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }

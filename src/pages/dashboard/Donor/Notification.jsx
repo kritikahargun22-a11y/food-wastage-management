@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
     LayoutDashboard,
@@ -10,23 +10,30 @@ import {
     Leaf,
     Menu,
     X,
-    Check,
-    Truck,
-    AlarmClock,
     Recycle,
+    Loader2,
+    PackagePlus as DonationIcon,
+    Truck,
+    CheckCircle2,
+    AlarmClock,
 } from "lucide-react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "../../../firebase.js";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useLogout } from "../../../hooks/useLogout.js";
-/* ---------------- Sidebar ---------------- */
+
 const NAV_ITEMS = [
-    { label: "Overview", icon: LayoutDashboard, href: "#dashboard" },
+    { label: "Dashboard", icon: LayoutDashboard, href: "#dashboard" },
     { label: "Donate Food", icon: PackagePlus, href: "#donate-food" },
     { label: "Donation History", icon: History, href: "#donation-history" },
-    { label: "Notifications", icon: BellIcon, active: true, href: "#notifications" },
+    { label: "Notifications", icon: BellIcon, active: true, href: "#notification" },
     { label: "Profile", icon: User, href: "#profile" },
+    { label: "Settings", icon: LayoutDashboard, href: "#settings" },
 ];
 
 function Sidebar({ open, onClose }) {
     const handleLogout = useLogout();
+
     return (
         <>
             {open && (
@@ -54,8 +61,8 @@ function Sidebar({ open, onClose }) {
                             key={item.label}
                             href={item.href}
                             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
-                                ? "bg-accent text-primary-dark"
-                                : "text-muted hover:bg-gray-50 hover:text-ink"
+                                    ? "bg-accent text-primary-dark"
+                                    : "text-muted hover:bg-gray-50 hover:text-ink"
                                 }`}
                         >
                             <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
@@ -69,7 +76,7 @@ function Sidebar({ open, onClose }) {
                         <Recycle className="h-4 w-4 text-primary-dark" aria-hidden="true" />
                         <p className="text-xs font-bold text-primary-darker uppercase tracking-wide">Your Impact</p>
                     </div>
-                    <p className="text-xs text-muted leading-snug">142 kg rescued · 6 donations this month</p>
+                    <p className="text-xs text-muted leading-snug">Keep donating to grow your impact!</p>
                 </div>
 
                 <div className="px-4 pb-6 border-t border-gray-100 pt-4">
@@ -86,8 +93,7 @@ function Sidebar({ open, onClose }) {
     );
 }
 
-/* ---------------- Header ---------------- */
-function DashboardHeader({ onMenuClick }) {
+function DashboardHeader({ onMenuClick, name }) {
     return (
         <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 h-20">
             <div className="flex items-center gap-3">
@@ -95,52 +101,54 @@ function DashboardHeader({ onMenuClick }) {
                     <Menu className="h-6 w-6" />
                 </button>
                 <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">
-                    Welcome back, Aarav 👋
+                    Welcome back, {name} 👋
                 </h1>
-            </div>
-            <div className="flex items-center gap-4">
-                <button className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-accent" aria-label="Notifications">
-                    <BellIcon className="h-5 w-5 text-ink" />
-                    <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
-                </button>
-                <span className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-200 to-orange-400 flex items-center justify-center text-xs font-bold text-white">
-                    AM
-                </span>
             </div>
         </header>
     );
 }
 
-/* ---------------- Notifications List ---------------- */
-const NOTIFICATIONS = [
-    {
-        id: "1",
-        icon: Check,
-        iconBg: "bg-emerald-500",
-        title: "Donation claimed",
-        desc: "Hope Kitchen Trust claimed your Fresh Vegetable Crate",
-        time: "2h ago",
-    },
-    {
-        id: "2",
-        icon: Truck,
-        iconBg: "bg-sky-500",
-        title: "Pickup in transit",
-        desc: "Priya Sharma is on the way",
-        time: "40 min ago",
-    },
-    {
-        id: "3",
-        icon: AlarmClock,
-        iconBg: "bg-orange-500",
-        title: "Expiry alert",
-        desc: "Bakery Surplus Box expires in 1 hour",
-        time: "1d ago",
-    },
-];
+const ICON_MAP = {
+    donation: { icon: DonationIcon, bg: "bg-emerald-500" },
+    pickup: { icon: Truck, bg: "bg-sky-500" },
+    delivery: { icon: CheckCircle2, bg: "bg-primary" },
+    expiry: { icon: AlarmClock, bg: "bg-orange-500" },
+};
+
+function timeAgo(timestamp) {
+    if (!timestamp?.seconds) return "";
+    const diffMs = Date.now() - timestamp.seconds * 1000;
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+}
 
 function NotificationsList() {
-    const [items] = useState(NOTIFICATIONS);
+    const { user } = useAuth();
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!user) return;
+        const q = query(collection(db, "notifications"), where("userId", "==", user.uid));
+        const unsubscribe = onSnapshot(
+            q,
+            (snapshot) => {
+                const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+                list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                setItems(list);
+                setLoading(false);
+            },
+            (err) => {
+                console.error("Failed to load notifications:", err);
+                setLoading(false);
+            }
+        );
+        return unsubscribe;
+    }, [user]);
 
     return (
         <motion.div
@@ -151,37 +159,46 @@ function NotificationsList() {
         >
             <h2 className="text-lg font-bold text-primary-darker mb-6">Notifications</h2>
 
-            <div className="space-y-3">
-                {items.map((n, i) => (
-                    <motion.div
-                        key={n.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: i * 0.08 }}
-                        className="flex items-start gap-4 rounded-xl border border-gray-100 px-4 py-4 hover:bg-gray-50/60 transition"
-                    >
-                        <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${n.iconBg}`}>
-                            <n.icon className="h-5 w-5 text-white" aria-hidden="true" />
-                        </span>
-                        <div className="min-w-0">
-                            <p className="text-sm font-bold text-ink">{n.title}</p>
-                            <p className="text-xs text-muted mt-0.5">
-                                {n.desc} · {n.time}
-                            </p>
-                        </div>
-                    </motion.div>
-                ))}
+            {loading ? (
+                <div className="flex items-center justify-center py-16">
+                    <Loader2 className="h-6 w-6 text-primary animate-spin" aria-hidden="true" />
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {items.map((n, i) => {
+                        const meta = ICON_MAP[n.type] || ICON_MAP.donation;
+                        return (
+                            <motion.div
+                                key={n.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: i * 0.05 }}
+                                className="flex items-start gap-4 rounded-xl border border-gray-100 px-4 py-4 hover:bg-gray-50/60 transition"
+                            >
+                                <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${meta.bg}`}>
+                                    <meta.icon className="h-5 w-5 text-white" aria-hidden="true" />
+                                </span>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-bold text-ink">{n.title}</p>
+                                    <p className="text-xs text-muted mt-0.5">
+                                        {n.desc} · {timeAgo(n.createdAt)}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
 
-                {items.length === 0 && (
-                    <p className="text-sm text-muted text-center py-10">No notifications yet.</p>
-                )}
-            </div>
+                    {items.length === 0 && (
+                        <p className="text-sm text-muted text-center py-10">No notifications yet.</p>
+                    )}
+                </div>
+            )}
         </motion.div>
     );
 }
 
-/* ---------------- Main Page ---------------- */
-export default function Notifications() {
+export default function Notification() {
+    const { profile } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
@@ -189,7 +206,7 @@ export default function Notifications() {
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             <div className="flex-1 flex flex-col min-w-0">
-                <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+                <DashboardHeader onMenuClick={() => setSidebarOpen(true)} name={profile?.name?.split(" ")[0] || "Donor"} />
 
                 <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto">
                     <NotificationsList />

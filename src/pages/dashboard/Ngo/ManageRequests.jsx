@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { sendNotification } from "../../../utils/notify.js";
 import {
   LayoutDashboard,
   PackageSearch,
@@ -237,6 +238,15 @@ function ManageRequests() {
         volunteerId: volunteer.id,
         volunteerName: volunteer.name,
       });
+
+      // Notify the volunteer
+      await sendNotification({
+        userId: volunteer.id,
+        title: "New pickup assigned",
+        desc: `You've been assigned to pick up "${assignTarget.title}"`,
+        type: "pickup",
+      });
+
       setAssignTarget(null);
     } catch (err) {
       console.error("Failed to assign volunteer:", err);
@@ -247,12 +257,22 @@ function ManageRequests() {
 
   async function markDelivered(donationId) {
     try {
+      const donation = requests.find((r) => r.id === donationId);
       await updateDoc(doc(db, "donations", donationId), { status: "Delivered" });
+
+      // Notify the donor
+      if (donation?.donorId) {
+        await sendNotification({
+          userId: donation.donorId,
+          title: "Donation delivered",
+          desc: `Your "${donation.title}" was successfully delivered`,
+          type: "delivery",
+        });
+      }
     } catch (err) {
       console.error("Failed to mark delivered:", err);
     }
   }
-
   const filtered = requests.filter((r) => filter === "All" || r.status === filter);
 
   return (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { sendNotification } from "../../../utils/notify.js";
 import {
   LayoutDashboard,
   PackageSearch,
@@ -204,13 +205,20 @@ function AvailableDonationsGrid() {
   async function handleClaim(donationId) {
     setClaiming(donationId);
     try {
+      const donation = donations.find((d) => d.id === donationId);
       await updateDoc(doc(db, "donations", donationId), {
         status: "Claimed",
         ngoId: user?.uid || null,
         ngoName: profile?.name || "Unknown NGO",
       });
-      // onSnapshot will automatically remove it from this list
-      // since status no longer matches "Available".
+
+      // Notify the donor
+      await sendNotification({
+        userId: donation.donorId,
+        title: "Donation claimed",
+        desc: `${profile?.name || "An NGO"} claimed your "${donation.title}"`,
+        type: "donation",
+      });
     } catch (err) {
       console.error("Failed to claim donation:", err);
     } finally {

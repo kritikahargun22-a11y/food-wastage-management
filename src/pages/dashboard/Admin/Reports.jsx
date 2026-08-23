@@ -13,6 +13,7 @@ import {
   Leaf,
   Menu,
   X,
+  Utensils,
   ShieldCheck,
   Download,
   FileSpreadsheet,
@@ -23,9 +24,9 @@ import {
 import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "#admin-dashboard" },
-  { label: "Manage Users", icon: Users, href: "#manage-users" },
-  { label: "Manage Donations", icon: Truck, href: "#manage-donations" },
+  { label: "Overview", icon: LayoutDashboard, href: "#admin-dashboard" },
+  { label: "Manage Users", icon: Users, href: "#manage-user" },
+  { label: "Manage Donations", icon: Utensils, href: "#manage-donations" },
   { label: "Approve NGOs", icon: Building2, href: "#approve-ngos" },
   { label: "Analytics", icon: BarChart3, href: "#analytics" },
   { label: "Reports", icon: FileText, active: true, href: "#reports" },

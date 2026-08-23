@@ -13,6 +13,7 @@ import {
   Leaf,
   Menu,
   X,
+  Utensils,
   ShieldCheck,
   Loader2,
 } from "lucide-react";
@@ -22,9 +23,9 @@ import { useLogout } from "../../../hooks/useLogout.js";
 
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "#admin-dashboard" },
+  { label: "Overview", icon: LayoutDashboard, href: "#admin-dashboard" },
   { label: "Manage Users", icon: Users, active: true, href: "#manage-user" },
-  { label: "Manage Donations", icon: Truck, href: "#manage-donations" },
+  { label: "Manage Donations", icon: Utensils, href: "#manage-donations" },
   { label: "Approve NGOs", icon: Building2, href: "#approve-ngos" },
   { label: "Analytics", icon: BarChart3, href: "#analytics" },
   { label: "Reports", icon: FileText, href: "#reports" },
@@ -66,8 +67,8 @@ function Sidebar({ open, onClose }) {
               key={item.label}
               href={item.href}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
-                  ? "bg-accent text-primary-dark"
-                  : "text-muted hover:bg-gray-50 hover:text-ink"
+                ? "bg-accent text-primary-dark"
+                : "text-muted hover:bg-gray-50 hover:text-ink"
                 }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
@@ -178,8 +179,8 @@ function ManageUsers() {
             key={f}
             onClick={() => setFilter(f)}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${filter === f
-                ? "bg-primary text-white border-primary"
-                : "bg-white text-muted border-gray-200 hover:border-primary/40"
+              ? "bg-primary text-white border-primary"
+              : "bg-white text-muted border-gray-200 hover:border-primary/40"
               }`}
           >
             {FILTER_LABELS[f]}
