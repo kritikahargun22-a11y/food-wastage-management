@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { sendNotification } from "../../../utils/notify.js";
 import {
   LayoutDashboard,
   Bike,
@@ -23,9 +22,10 @@ import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/f
 import { db } from "../../../firebase.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useLogout } from "../../../hooks/useLogout.js";
+
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
-  { label: "Overview", icon: LayoutDashboard, href: "#volunteer-dashboard" },
+  { label: "Dashboard", icon: LayoutDashboard, href: "#volunteer-dashboard" },
   { label: "Assigned Pickups", icon: Bike, active: true, href: "#assigned-pickups" },
   { label: "Navigation", icon: NavigationIcon, href: "#volunteer-navigation" },
   { label: "Delivery History", icon: History, href: "#volunteer-history" },
@@ -36,6 +36,7 @@ const NAV_ITEMS = [
 
 function Sidebar({ open, onClose, available, onToggleAvailable }) {
   const handleLogout = useLogout();
+
   return (
     <>
       {open && (
@@ -63,8 +64,8 @@ function Sidebar({ open, onClose, available, onToggleAvailable }) {
               key={item.label}
               href={item.href}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${item.active
-                ? "bg-accent text-primary-dark"
-                : "text-muted hover:bg-gray-50 hover:text-ink"
+                  ? "bg-accent text-primary-dark"
+                  : "text-muted hover:bg-gray-50 hover:text-ink"
                 }`}
             >
               <item.icon className="h-4.5 w-4.5" aria-hidden="true" />
@@ -236,26 +237,7 @@ function PickupsList() {
   async function markDelivered(id) {
     setUpdating(id);
     try {
-      const pickup = pickups.find((p) => p.id === id);
       await updateDoc(doc(db, "donations", id), { status: "Delivered" });
-
-      // Notify donor and NGO
-      if (pickup?.donorId) {
-        await sendNotification({
-          userId: pickup.donorId,
-          title: "Donation delivered",
-          desc: `Your "${pickup.title}" was successfully delivered`,
-          type: "delivery",
-        });
-      }
-      if (pickup?.ngoId) {
-        await sendNotification({
-          userId: pickup.ngoId,
-          title: "Delivery confirmed",
-          desc: `"${pickup.title}" has been delivered`,
-          type: "delivery",
-        });
-      }
     } catch (err) {
       console.error("Failed to mark delivered:", err);
     } finally {
@@ -281,8 +263,8 @@ function PickupsList() {
             key={f}
             onClick={() => setFilter(f)}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${filter === f
-              ? "bg-primary text-white border-primary"
-              : "bg-white text-muted border-gray-200 hover:border-primary/40"
+                ? "bg-primary text-white border-primary"
+                : "bg-white text-muted border-gray-200 hover:border-primary/40"
               }`}
           >
             {f}

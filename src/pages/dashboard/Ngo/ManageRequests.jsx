@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { sendNotification } from "../../../utils/notify.js";
 import {
   LayoutDashboard,
   PackageSearch,
@@ -28,6 +27,7 @@ import {
 import { db } from "../../../firebase.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useLogout } from "../../../hooks/useLogout.js";
+
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "#ngo-dashboard" },
@@ -40,6 +40,7 @@ const NAV_ITEMS = [
 
 function Sidebar({ open, onClose }) {
   const handleLogout = useLogout();
+
   return (
     <>
       {open && (
@@ -90,7 +91,7 @@ function Sidebar({ open, onClose }) {
             <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
             Log Out
           </button>
-        </div >
+        </div>
       </aside >
     </>
   );
@@ -238,15 +239,6 @@ function ManageRequests() {
         volunteerId: volunteer.id,
         volunteerName: volunteer.name,
       });
-
-      // Notify the volunteer
-      await sendNotification({
-        userId: volunteer.id,
-        title: "New pickup assigned",
-        desc: `You've been assigned to pick up "${assignTarget.title}"`,
-        type: "pickup",
-      });
-
       setAssignTarget(null);
     } catch (err) {
       console.error("Failed to assign volunteer:", err);
@@ -257,22 +249,12 @@ function ManageRequests() {
 
   async function markDelivered(donationId) {
     try {
-      const donation = requests.find((r) => r.id === donationId);
       await updateDoc(doc(db, "donations", donationId), { status: "Delivered" });
-
-      // Notify the donor
-      if (donation?.donorId) {
-        await sendNotification({
-          userId: donation.donorId,
-          title: "Donation delivered",
-          desc: `Your "${donation.title}" was successfully delivered`,
-          type: "delivery",
-        });
-      }
     } catch (err) {
       console.error("Failed to mark delivered:", err);
     }
   }
+
   const filtered = requests.filter((r) => filter === "All" || r.status === filter);
 
   return (
@@ -368,7 +350,7 @@ function ManageRequests() {
             </table>
 
             {filtered.length === 0 && (
-              <p className="text-sm text-muted text-center py-10">No requests match this filter.</p>
+              <p className="text-sm text-muted text-center py-10">No requests found</p>
             )}
           </div>
         )}
@@ -380,9 +362,9 @@ function ManageRequests() {
             donation={assignTarget}
             volunteers={volunteers}
             loadingVolunteers={loadingVolunteers}
-            assigning={assigning}
             onAssign={handleAssign}
             onClose={() => setAssignTarget(null)}
+            assigning={assigning}
           />
         )}
       </AnimatePresence>
@@ -390,22 +372,4 @@ function ManageRequests() {
   );
 }
 
-/* ---------------- Main Page ---------------- */
-export default function ManageRequestsPage() {
-  const { profile } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  return (
-    <div className="min-h-screen bg-gray-50/60 flex">
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-      <div className="flex-1 flex flex-col min-w-0">
-        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} orgName={profile?.name || "NGO Dashboard"} />
-
-        <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto">
-          <ManageRequests />
-        </main>
-      </div>
-    </div>
-  );
-}
+export default ManageRequests;

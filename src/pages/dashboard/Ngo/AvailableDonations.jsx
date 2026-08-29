@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { sendNotification } from "../../../utils/notify.js";
 import {
   LayoutDashboard,
   PackageSearch,
@@ -28,10 +27,11 @@ import {
 import { db } from "../../../firebase.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useLogout } from "../../../hooks/useLogout.js";
+
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "#ngo-dashboard" },
-  { label: "Available Donations", icon: PackageSearch, active: true, href: "#available-donations" },
+  { label: "Available Donations", icon: PackageSearch, active: true, href: "#available-donation" },
   { label: "Manage Requests", icon: ClipboardList, href: "#manage-requests" },
   { label: "Donation History", icon: History, href: "#ngo-donation-history" },
   { label: "Notifications", icon: Bell, href: "#ngo-notifications" },
@@ -40,6 +40,7 @@ const NAV_ITEMS = [
 
 function Sidebar({ open, onClose }) {
   const handleLogout = useLogout();
+
   return (
     <>
       {open && (
@@ -90,7 +91,7 @@ function Sidebar({ open, onClose }) {
             <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
             Log Out
           </button>
-        </div >
+        </div>
       </aside >
     </>
   );
@@ -205,19 +206,10 @@ function AvailableDonationsGrid() {
   async function handleClaim(donationId) {
     setClaiming(donationId);
     try {
-      const donation = donations.find((d) => d.id === donationId);
       await updateDoc(doc(db, "donations", donationId), {
         status: "Claimed",
         ngoId: user?.uid || null,
         ngoName: profile?.name || "Unknown NGO",
-      });
-
-      // Notify the donor
-      await sendNotification({
-        userId: donation.donorId,
-        title: "Donation claimed",
-        desc: `${profile?.name || "An NGO"} claimed your "${donation.title}"`,
-        type: "donation",
       });
     } catch (err) {
       console.error("Failed to claim donation:", err);
