@@ -21,6 +21,7 @@ import {
   QrCode,
   PenLine,
 } from "lucide-react";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
@@ -111,7 +112,7 @@ function DashboardHeader({ onMenuClick }) {
           <Menu className="h-6 w-6" />
         </button>
         <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">
-          Hey Aditi, 2 pickups today
+          Hey {name}, 2 pickups today
         </h1>
       </div>
       <div className="flex items-center gap-4">
@@ -317,11 +318,26 @@ function NavigationCard() {
 }
 
 /* ---------------- Main Dashboard Page ---------------- */
-export default function VolunteerDashboard() {
+export default function VolunteerDashboard(onMenuClick, name, initials) {
+  const { profile } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [available, setAvailable] = useState(true);
   const [pickedUp, setPickedUp] = useState(false);
+  const [isNewUser] = useState(() => sessionStorage.getItem("justSignedUp") === "true");
 
+  useEffect(() => {
+    sessionStorage.removeItem("justSignedUp");
+  }, []);
+
+  const greeting = isNewUser ? "Welcome" : "Welcome back";
+
+  const volunteerinitials = profile?.name
+    ? profile.name.split(" ")
+      .map((n) => n[0]
+      ).slice(0, 2)
+      .join("")
+      .toUpperCase()
+    : "V";
   return (
     <div className="min-h-screen bg-gray-50/60 flex">
       <Sidebar
@@ -332,7 +348,8 @@ export default function VolunteerDashboard() {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+        <DashboardHeader onMenuClick={() => setSidebarOpen(true)}
+          orgName={profile?.name || "Volunteer Dashboard"} />
 
         <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">

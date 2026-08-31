@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
     LayoutDashboard,
@@ -21,6 +21,7 @@ import {
     Recycle,
     Settings as SettingsIcon,
 } from "lucide-react";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
@@ -99,7 +100,7 @@ function Sidebar({ open, onClose }) {
 }
 
 /* ---------------- Header ---------------- */
-function DashboardHeader({ onMenuClick }) {
+function DashboardHeader({ onMenuClick, greeting, name, initials }) {
     return (
         <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 h-20">
             <div className="flex items-center gap-3">
@@ -107,7 +108,7 @@ function DashboardHeader({ onMenuClick }) {
                     <Menu className="h-6 w-6" />
                 </button>
                 <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">
-                    Welcome back, Aarav 👋
+                    Welcome , {name} 👋
                 </h1>
             </div>
 
@@ -125,7 +126,7 @@ function DashboardHeader({ onMenuClick }) {
                     <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
                 </button>
                 <span className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-200 to-orange-400 flex items-center justify-center text-xs font-bold text-white">
-                    AM
+                    {initials}
                 </span>
             </div>
         </header>
@@ -334,14 +335,26 @@ function RecentActivity() {
 
 /* ---------------- Main Dashboard Page ---------------- */
 export default function DonorDashboard() {
+    const { profile } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isNewUser] = useState(() => sessionStorage.getItem("justSignup") === "true");
+    useEffect(() => {
+        sessionStorage.removeItem("justSignedUp");
+    }, []);
 
+    const greeting = isNewUser ? "Welcome" : "Welcome back";
+
+    const initials = profile?.name
+        ? profile.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+        : "U";
     return (
         <div className="min-h-screen bg-gray-50/60 flex">
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             <div className="flex-1 flex flex-col min-w-0">
-                <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+                <DashboardHeader onMenuClick={() => setSidebarOpen(true)}
+                    name={profile?.name?.split(" ")[0] || "Donor"}
+                />
 
                 <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto space-y-8">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">

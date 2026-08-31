@@ -113,7 +113,7 @@ export default function Signup() {
         role: role,
         createdAt: serverTimestamp(),
       });
-
+      sessionStorage.setItem("justSignedUp", "true");
       // Redirect based on role
       if (role === "ngo") {
         window.location.hash = "#ngo-dashboard";

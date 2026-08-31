@@ -189,7 +189,7 @@ function ManageRequests() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [assignTarget, setAssignTarget] = useState(null);
   const [volunteers, setVolunteers] = useState([]);
   const [loadingVolunteers, setLoadingVolunteers] = useState(false);
@@ -258,117 +258,124 @@ function ManageRequests() {
   const filtered = requests.filter((r) => filter === "All" || r.status === filter);
 
   return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="card p-7"
-      >
-        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-          <h2 className="text-lg font-bold text-primary-darker">Manage Requests</h2>
-        </div>
+    <div className="min-h-screen flex bg-gray-50">
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-        <div className="flex gap-2 flex-wrap mb-6">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${filter === f
-                ? "bg-primary text-white border-primary"
-                : "bg-white text-muted border-gray-200 hover:border-primary/40"
-                }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 text-primary animate-spin" aria-hidden="true" />
+      <main className="flex-1 lg:ml-64 min-h-screen p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="card p-7"
+        >
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+            <h2 className="text-lg font-bold text-primary-darker">Manage Requests</h2>
           </div>
-        ) : (
-          <div className="overflow-x-auto -mx-2">
-            <table className="w-full text-sm min-w-[600px]">
-              <thead>
-                <tr className="text-left text-xs font-bold uppercase tracking-wide text-muted">
-                  <th className="px-2 pb-3">Donation</th>
-                  <th className="px-2 pb-3">Donor</th>
-                  <th className="px-2 pb-3">Volunteer</th>
-                  <th className="px-2 pb-3">Status</th>
-                  <th className="px-2 pb-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <AnimatePresence>
-                  {filtered.map((r) => {
-                    const s = STATUS_STYLES[r.status] || STATUS_STYLES.Claimed;
-                    return (
-                      <motion.tr
-                        key={r.id}
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="border-t border-gray-100"
-                      >
-                        <td className="px-2 py-3.5 font-semibold text-ink">{r.title}</td>
-                        <td className="px-2 py-3.5 text-ink/80">{r.donorName || "—"}</td>
-                        <td className="px-2 py-3.5 text-ink/80">{r.volunteerName || "—"}</td>
-                        <td className="px-2 py-3.5">
-                          <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${s.bg} ${s.text}`}>
-                            {r.status}
-                          </span>
-                        </td>
-                        <td className="px-2 py-3.5 text-right">
-                          {r.status === "Claimed" && (
-                            <button
-                              onClick={() => openAssignModal(r)}
-                              className="text-xs font-semibold text-primary hover:text-primary-dark"
-                            >
-                              Assign →
-                            </button>
-                          )}
-                          {r.status === "In Transit" && (
-                            <button
-                              onClick={() => markDelivered(r.id)}
-                              className="text-xs font-semibold text-primary hover:text-primary-dark"
-                            >
-                              Mark Delivered →
-                            </button>
-                          )}
-                          {r.status === "Delivered" && (
-                            <span className="text-xs font-semibold text-muted">Completed</span>
-                          )}
-                        </td>
-                      </motion.tr>
-                    );
-                  })}
-                </AnimatePresence>
-              </tbody>
-            </table>
 
-            {filtered.length === 0 && (
-              <p className="text-sm text-muted text-center py-10">No requests found</p>
-            )}
+          <div className="flex gap-2 flex-wrap mb-6">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${filter === f
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-muted border-gray-200 hover:border-primary/40"
+                  }`}
+              >
+                {f}
+              </button>
+            ))}
           </div>
-        )}
-      </motion.div>
 
-      <AnimatePresence>
-        {assignTarget && (
-          <AssignModal
-            donation={assignTarget}
-            volunteers={volunteers}
-            loadingVolunteers={loadingVolunteers}
-            onAssign={handleAssign}
-            onClose={() => setAssignTarget(null)}
-            assigning={assigning}
-          />
-        )}
-      </AnimatePresence>
-    </>
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="h-6 w-6 text-primary animate-spin" aria-hidden="true" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto -mx-2">
+              <table className="w-full text-sm min-w-[600px]">
+                <thead>
+                  <tr className="text-left text-xs font-bold uppercase tracking-wide text-muted">
+                    <th className="px-2 pb-3">Donation</th>
+                    <th className="px-2 pb-3">Donor</th>
+                    <th className="px-2 pb-3">Volunteer</th>
+                    <th className="px-2 pb-3">Status</th>
+                    <th className="px-2 pb-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <AnimatePresence>
+                    {filtered.map((r) => {
+                      const s = STATUS_STYLES[r.status] || STATUS_STYLES.Claimed;
+                      return (
+                        <motion.tr
+                          key={r.id}
+                          layout
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="border-t border-gray-100"
+                        >
+                          <td className="px-2 py-3.5 font-semibold text-ink">{r.title}</td>
+                          <td className="px-2 py-3.5 text-ink/80">{r.donorName || "—"}</td>
+                          <td className="px-2 py-3.5 text-ink/80">{r.volunteerName || "—"}</td>
+                          <td className="px-2 py-3.5">
+                            <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${s.bg} ${s.text}`}>
+                              {r.status}
+                            </span>
+                          </td>
+                          <td className="px-2 py-3.5 text-right">
+                            {r.status === "Claimed" && (
+                              <button
+                                onClick={() => openAssignModal(r)}
+                                className="text-xs font-semibold text-primary hover:text-primary-dark"
+                              >
+                                Assign →
+                              </button>
+                            )}
+                            {r.status === "In Transit" && (
+                              <button
+                                onClick={() => markDelivered(r.id)}
+                                className="text-xs font-semibold text-primary hover:text-primary-dark"
+                              >
+                                Mark Delivered →
+                              </button>
+                            )}
+                            {r.status === "Delivered" && (
+                              <span className="text-xs font-semibold text-muted">Completed</span>
+                            )}
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+
+              {filtered.length === 0 && (
+                <p className="text-sm text-muted text-center py-10">No requests found</p>
+              )}
+            </div>
+          )}
+        </motion.div>
+
+        <AnimatePresence>
+          {assignTarget && (
+            <AssignModal
+              donation={assignTarget}
+              volunteers={volunteers}
+              loadingVolunteers={loadingVolunteers}
+              onAssign={handleAssign}
+              onClose={() => setAssignTarget(null)}
+              assigning={assigning}
+            />
+          )}
+        </AnimatePresence>
+      </main>
+    </div>
   );
 }
 

@@ -93,15 +93,8 @@ function Sidebar({ open, onClose }) {
                     </button>
                 </div>
             </aside>
-            <div className="px-4 pb-6 border-t border-gray-100 pt-4">
-                <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
-                >
-                    <LogOut className="h-4.5 w-4.5" aria-hidden="true" />
-                    Log Out
-                </button>
-            </div>
+
+
         </>
     );
 }

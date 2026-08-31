@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   ArrowRight,
 } from "lucide-react";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useLogout } from "../../../hooks/useLogout.js";
 /* ---------------- Sidebar ---------------- */
 const NAV_ITEMS = [
@@ -84,7 +85,7 @@ function Sidebar({ open, onClose }) {
 }
 
 /* ---------------- Header ---------------- */
-function DashboardHeader({ onMenuClick }) {
+function DashboardHeader({ onMenuClick, orgName, initials }) {
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 h-20">
       <div className="flex items-center gap-3">
@@ -93,7 +94,7 @@ function DashboardHeader({ onMenuClick }) {
         </button>
         <div>
           <h1 className="text-xl font-extrabold text-primary-darker tracking-tight">
-            Hope Kitchen Trust
+            {orgName ? `Welcome, ${orgName} 👋` : "Welcome, NGO 👋"}
           </h1>
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" /> Verified NGO
@@ -106,7 +107,7 @@ function DashboardHeader({ onMenuClick }) {
           <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
         </button>
         <span className="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-200 to-emerald-500 flex items-center justify-center text-xs font-bold text-white">
-          HK
+          {initials}
         </span>
       </div>
     </header>
@@ -359,15 +360,26 @@ function LivePickupTracker() {
 }
 
 /* ---------------- Main Dashboard Page ---------------- */
-export default function NgoDashboard() {
+export default function NgoDashboard(onMenuClick, name, initials) {
+  const { profile } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isNewUser] = useState(() => sessionStorage.getItem("justSignedUp") === "true");
 
+  useEffect(() => {
+    sessionStorage.removeItem("justSignedUp");
+  }, []);
+
+  const greeting = isNewUser ? "Welcome" : "Welcome back";
+
+  const ngoinitials = profile?.name
+    ? profile.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+    : "N";
   return (
     <div className="min-h-screen bg-gray-50/60 flex">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} orgName={profile?.name || "NGO Dashboard"} />
 
         <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto space-y-8">
           {/* Stats */}

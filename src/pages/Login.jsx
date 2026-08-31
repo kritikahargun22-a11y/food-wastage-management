@@ -25,6 +25,7 @@ export default function Login() {
 
     try {
       const { profile } = await login(form.email, form.password);
+      sessionStorage.setItem("justSignup", "true");
       console.log("Logged in user profile:", profile);
 
       if (!profile) {
